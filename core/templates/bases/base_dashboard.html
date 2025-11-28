@@ -1,0 +1,313 @@
+{% extends "bases/base_with_cart_icon.html" %}
+{% load active_link %}
+{% block content %}
+    <div class="container">
+        <div class="grid grid-cols-12 gap-4">
+            <!-- sidebar -->
+            <div class="col-span-12 lg:col-span-3">
+                <!-- Desktop sidebar -->
+                <div class="sticky top-32 hidden w-full overflow-hidden rounded-lg bg-muted shadow-base lg:block">
+                    <div dir="ltr" class="max-h-[calc(90vh_-_100px)] overflow-y-auto p-4 xl:p-6">
+                        <div dir="rtl">
+                            <!-- Head -->
+                            <div class="mb-2 flex items-center justify-between border-b pb-6 dark:border-white/10">
+                                <div class="flex items-center gap-x-4">
+                                    <div>
+                                        <img src="./assets/images/user.png" class="h-12 w-12 rounded-full" alt="" />
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <div class="line-clamp-1">{{ user.user_profile.full_name }}</div>
+                                        <div class="line-clamp-1 text-text/90">{{ user.phone }}</div>
+                                    </div>
+                                </div>
+                                <a href="./profile-edit.html">
+                                    <svg class="h-6 w-6 text-primary">
+                                        <use xlink:href="#edit" />
+                                    </svg>
+                                </a>
+                            </div>
+
+                            <ul class="space-y-1">
+                                <li>
+                                    <a href="{% url 'dashboard:counter' %}"
+                                       class="profile-menu-{% active_link 'dashboard:counter' %} flex items-center justify-between rounded-lg px-2 py-4 xl:px-4 ">
+                                        <div class="flex items-center gap-x-4">
+                                            <svg class="h-6 w-6">
+                                                <use xlink:href="#home" />
+                                            </svg>
+                                            <div>پیشخوان</div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'dashboard:order-list' %}"
+                                       class="profile-menu-{% active_link 'dashboard:order-list' %}  flex items-center justify-between rounded-lg px-2 py-4 xl:px-4 ">
+                                        <div class="flex items-center gap-x-4">
+                                            <svg class="h-6 w-6">
+                                                <use xlink:href="#order" />
+                                            </svg>
+                                            <div>سفارش ها</div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'dashboard:wishlist-product' %}"
+                                       class="profile-menu-{% active_link 'dashboard:wishlist-product' %} flex items-center justify-between rounded-lg px-2 py-4 xl:px-4 ">
+                                        <div class="flex items-center gap-x-4">
+                                            <svg class="h-6 w-6">
+                                                <use xlink:href="#heart" />
+                                            </svg>
+                                            <div>علاقه‌مندی ها</div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'dashboard:recently-viewed-products' %}"
+                                       class="profile-menu-{% active_link 'dashboard:recently-viewed-products' %} flex items-center justify-between rounded-lg px-2 py-4 xl:px-4">
+                                        <div class="flex items-center gap-x-4">
+                                            <svg class="h-6 w-6">
+                                                <use xlink:href="#recent" />
+                                            </svg>
+                                            <div>بازدید های اخیر</div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'dashboard:message-list' %}"
+                                       class="profile-menu-{% active_link 'dashboard:message-list' %} flex items-center justify-between rounded-lg px-2 py-4 xl:px-4">
+                                        <div class="flex items-center gap-x-4">
+                                            <svg class="h-6 w-6">
+                                                <use xlink:href="#notification" />
+                                            </svg>
+                                            <div>پیام ها</div>
+                                        </div>
+                                        {% if new_messages != 0 %}
+                                        <div
+                                            class="flex h-6 w-6 items-center justify-center rounded-lg bg-primary text-sm font-bold text-white dark:bg-emerald-600">
+                                             {{ new_messages_count }} 
+                                        </div>
+                                        {% endif %}
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'dashboard:address' %}"
+                                       class="profile-menu-{% active_link 'dashboard:address' %} flex items-center justify-between rounded-lg px-2 py-4 xl:px-4">
+                                        <div class="flex items-center gap-x-4">
+                                            <svg class="h-6 w-6">
+                                                <use xlink:href="#address" />
+                                            </svg>
+                                            <div>آدرس ها</div>
+                                        </div>
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="{% url 'dashboard:profile-detail' pk=request.user.id %}"
+                                       class="profile-menu-{% active_link 'dashboard:profile-detail' pk=request.user.id %} flex items-center justify-between rounded-lg px-2 py-4 xl:px-4">
+                                        <div class="flex items-center gap-x-4">
+                                            <svg class="h-6 w-6">
+                                                <use xlink:href="#user-setting" />
+                                            </svg>
+                                            <div>اطلاعات حساب کاربری</div>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="flex items-center justify-between rounded-lg p-4 text-red-500 hover:bg-warning/10 dark:text-red-400 dark:hover:bg-red-400/10"
+                                       href="{% url 'account:logout' %}">
+                                        <div class="flex items-center gap-x-2">
+                                            <svg class="h-6 w-6">
+                                                <use xlink:href="#exit"></use>
+                                            </svg>
+                                            <span> خروج </span>
+                                        </div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- Mobile menu -->
+                <div class="rounded-lg bg-muted p-6 shadow-base lg:hidden">
+                    <div class="flex items-center justify-center">
+                        <div class="flex flex-col items-center justify-center gap-y-4">
+                            <div class="relative">
+                                <img src="./assets/images/user.png" class="h-20 w-20 only:rounded-full" alt="" />
+                                <a href="./profile-edit.html"
+                                   class="absolute -right-2 -top-2 rounded-full bg-primary p-2 text-sm text-white dark:bg-emerald-600">
+                                    <svg class="h-5 w-5">
+                                        <use xlink:href="#edit" />
+                                    </svg>
+                                </a>
+                            </div>
+                            <div>
+                                <p class="line-clamp-1">تایماز اکبری</p>
+                                <p class="text-text/60">09000000000</p>
+                            </div>
+                            <div>
+                                <button class="btn-primary px-4 py-2"
+                                        aria-controls="profile-menu-drawer-navigation"
+                                        data-drawer-show="profile-menu-drawer-navigation"
+                                        data-drawer-placement="bottom"
+                                        data-drawer-target="profile-menu-drawer-navigation" type="button">
+                                    <svg class="h-6 w-6 text-white">
+                                        <use xlink:href="#menu" />
+                                    </svg>
+                                    منوی پنل کاربری
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- dashboard content -->
+            {% block dashboard_content %}{% endblock dashboard_content %}
+        </div>
+    </div>
+
+
+  
+      <!-- Mobile Profile Menu Drawer -->
+      <div
+        aria-labelledby="profile-menu-drawer-navigation-label"
+        class="fixed bottom-0 left-0 right-0 z-40 w-full translate-y-full rounded-t-3xl bg-muted transition-transform duration-300"
+        id="profile-menu-drawer-navigation"
+        tabindex="-1"
+      >
+        <div
+          class="flex items-center justify-between gap-x-4 border-b p-4 pb-5"
+        >
+          <h5 class="text-lg text-text/90">منوی پنل کاربری</h5>
+          <button
+            aria-controls="user-account-drawer-navigation"
+            class="inline-flex items-center rounded-lg bg-transparent p-1.5 text-sm text-text/90 hover:bg-zinc-100 hover:text-gray-900 dark:hover:bg-black dark:hover:text-white"
+            data-drawer-hide="profile-menu-drawer-navigation"
+            type="button"
+          >
+            <svg class="h-5 w-5">
+              <use xlink:href="#close" />
+            </svg>
+
+            <span class="sr-only">Close menu</span>
+          </button>
+        </div>
+        <div class="p-4">
+          <ul class="space-y-1">
+            <li>
+              <a
+                href="{% url "dashboard:counter" %}"
+                class="profile-menu-{% active_link 'dashboard:counter' %} flex items-center justify-between rounded-lg px-2 py-4 xl:px-4"
+              >
+                <div class="flex items-center gap-x-4">
+                  <svg class="h-6 w-6">
+                    <use xlink:href="#home" />
+                  </svg>
+                  <div>پیشخوان</div>
+                </div>
+              </a>
+            </li>
+
+            <li>
+              <a
+                href="{% url "dashboard:order-list" %}"
+                class="profile-menu-{% active_link 'dashboard:order-list' %} flex items-center justify-between rounded-lg px-2 py-4 xl:px-4"
+              >
+                <div class="flex items-center gap-x-4">
+                  <svg class="h-6 w-6">
+                    <use xlink:href="#order" />
+                  </svg>
+                  <div>سفارش ها</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a
+                href="{% url "dashboard:wishlist-product" %}"
+                class="profile-menu-{% active_link 'dashboard:wishlist-product' %} flex items-center justify-between rounded-lg px-2 py-4 xl:px-4"
+              >
+                <div class="flex items-center gap-x-4">
+                  <svg class="h-6 w-6">
+                    <use xlink:href="#heart" />
+                  </svg>
+                  <div>علاقه‌مندی ها</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a
+                href="{% url "dashboard:recently-viewed-products" %}"
+                class="profile-menu-{% active_link 'dashboard:recently-viewed-products' %} flex items-center justify-between rounded-lg px-2 py-4 xl:px-4"
+              >
+                <div class="flex items-center gap-x-4">
+                  <svg class="h-6 w-6">
+                    <use xlink:href="#recent" />
+                  </svg>
+                  <div>بازدید های اخیر</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a
+                href="{% url "dashboard:message-list" %}"
+                class="profile-menu-{% active_link 'dashboard:message-list' %} flex items-center justify-between rounded-lg px-2 py-4 xl:px-4"
+              >
+                <div class="flex items-center gap-x-4">
+                  <svg class="h-6 w-6">
+                    <use xlink:href="#notification" />
+                  </svg>
+                  <div>پیام ها</div>
+                </div>
+                {% if new_messages != 0 %}
+                <div
+                  class="flex h-6 w-6 items-center justify-center rounded-lg bg-primary text-sm font-bold text-white dark:bg-emerald-600"
+                >
+                  {{ new_messages_count }}
+                </div>
+                {% endif %}
+              </a>
+            </li>
+            <li>
+              <a
+                href="{% url "dashboard:address" %}"
+                class="profile-menu-{% active_link 'dashboard:address' %} flex items-center justify-between rounded-lg px-2 py-4 xl:px-4"
+              >
+                <div class="flex items-center gap-x-4">
+                  <svg class="h-6 w-6">
+                    <use xlink:href="#address" />
+                  </svg>
+                  <div>آدرس ها</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a
+                href="{% url "dashboard:profile-detail" pk=request.user.id %}"
+                class="profile-menu-{% active_link 'dashboard:profile-detail' pk=request.user.id %} flex items-center justify-between rounded-lg px-2 py-4 xl:px-4"
+              >
+                <div class="flex items-center gap-x-4">
+                  <svg class="h-6 w-6">
+                    <use xlink:href="#user-setting" />
+                  </svg>
+                  <div>اطلاعات حساب کاربری</div>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a
+                class="flex items-center justify-between rounded-lg p-4 text-red-500 hover:bg-warning/10 dark:text-red-400 dark:hover:bg-red-400/10"
+                href="{% url "account:logout" %}"
+              >
+                <div class="flex items-center gap-x-2">
+                  <svg class="h-6 w-6">
+                    <use xlink:href="#exit"></use>
+                  </svg>
+                  <span> خروج </span>
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+{% endblock content %}
+
+

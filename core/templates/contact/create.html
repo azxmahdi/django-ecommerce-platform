@@ -1,0 +1,145 @@
+{% extends "bases/base_with_cart_icon.html" %}
+
+{% block content %}
+        <div class="container rounded-lg bg-muted p-5">
+          <!-- Head -->
+          <div class="mb-5 flex">
+            <h1 class="relative select-none pb-2 text-lg md:text-xl">
+              تماس با ما
+              <span
+                class="absolute bottom-0 right-0 h-0.5 w-full rounded-full bg-primary"
+              ></span>
+            </h1>
+          </div>
+          <!-- Content -->
+          <p class="mb-5 leading-loose text-text/90">
+            قبل از مطرح کردن هرگونه سوال ، بخش
+            <a href="#" class="text-primary">سوالات متداول</a>
+            را مطالعه نمایید.
+          </p>
+          <div class="grid grid-cols-5 gap-6">
+            <div class="col-span-5 md:col-span-3">
+              <form method="post" class="grid grid-cols-2 items-center gap-6">
+                {% csrf_token %}
+                <!-- Name -->
+                <div class="col-span-2 md:col-span-1">
+                  <label
+                    for="name"
+                    class="relative block rounded-lg border shadow-base"
+                  >
+                    <input
+                      type="text"
+                      name="name"
+                      class="peer w-full rounded-lg border-none bg-transparent px-4 py-3 placeholder-transparent focus:outline-hidden focus:ring-0"
+                      placeholder="نام شما"
+                    />
+
+                    <span
+                      class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-muted px-2 py-0.5 text-sm text-text/90 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-focus:top-0 peer-focus:text-sm"
+                    >
+                      نام شما
+                    </span>
+                  </label>
+                </div>
+                <!-- Phone -->
+                <div class="col-span-2 md:col-span-1">
+                  <label
+                    for="phone"
+                    class="relative block rounded-lg border shadow-base"
+                    >
+                    <input
+                      type="text"
+                      name="phone"
+                      class="peer w-full rounded-lg border-none bg-transparent px-4 py-3 placeholder-transparent focus:outline-hidden focus:ring-0"
+                      placeholder="شماره تماس 09*********" 
+                    />
+
+                    <span
+                      class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-muted px-2 py-0.5 text-sm text-text/90 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-focus:top-0 peer-focus:text-sm"
+                    >
+                      شماره تماس شما
+                    </span>
+                  </label>
+                </div>
+                <!-- Email -->
+                <div class="col-span-2">
+                  <label
+                    for="email"
+                    class="relative block rounded-lg border shadow-base"
+                  >
+                    <input
+                      type="text"
+                      name="email"
+                      class="peer w-full rounded-lg border-none bg-transparent px-4 py-3 placeholder-transparent focus:outline-hidden focus:ring-0"
+                      placeholder="ایمیل شما"
+                    />
+
+                    <span
+                      class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-muted px-2 py-0.5 text-sm text-text/90 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-focus:top-0 peer-focus:text-sm"
+                    >
+                      ایمیل شما
+                    </span>
+                  </label>
+                </div>
+                <!-- Message -->
+                <div class="col-span-2">
+                  <label
+                    for="message"
+                    class="relative block rounded-lg border shadow-base"
+                  >
+                    <textarea
+                      type="text"
+                      name="message"
+                      rows="3"
+                      class="main-scroll peer w-full rounded-lg border-none bg-transparent px-4 py-3 placeholder-transparent focus:outline-hidden focus:ring-0"
+                      placeholder="پیام شما"
+                    ></textarea>
+
+                    <span
+                      class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-muted px-2 py-0.5 text-sm text-text/90 transition-all peer-placeholder-shown:top-6 peer-placeholder-shown:text-base peer-focus:top-0 peer-focus:text-sm"
+                    >
+                      پیام شما
+                    </span>
+                  </label>
+                </div>
+                <!-- Submit -->
+                <div class="col-span-2 flex justify-end">
+                  <button class="btn-primary w-full px-4 py-2 md:w-auto" type="submit" >
+                    ارسال پیام
+                  </button>
+                </div>
+              </form>
+            </div>
+            <div class="order-first col-span-5 md:order-last md:col-span-2">
+              <ul class="space-y-6">
+                <li>
+                  <!-- Email -->
+                  <div class="flex flex-col gap-y-4">
+                    <p class="text-text/90">آدرس ایمیل</p>
+                    <a href="#" class="text-primary">{{ site_info.support_email }} </a>
+                  </div>
+                </li>
+
+                <li>
+                  <!-- phone -->
+                  <div class="flex flex-col gap-y-4">
+                    <p class="text-text/90">تلفن پشتیبانی</p>
+                    <a dir="ltr" href="#" class="text-primary">
+                      {{ site_info.support_phone }}
+                    </a>
+                  </div>
+                </li>
+                <li>
+                  <!-- phone -->
+                  <div class="flex flex-col gap-y-4">
+                    <p class="min-w-fit text-text/90">آدرس دفتر مرکزی</p>
+                    <a href="#" class="text-primary">
+                      {{ site_info.head_office_address }}
+                    </a>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        {% endblock content %}

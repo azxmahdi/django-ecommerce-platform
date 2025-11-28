@@ -1,0 +1,27 @@
+<div class="mb-8 rounded-lg bg-muted px-2 py-3 shadow-base xl:px-4">
+    <p class="mb-4 text-center text-sm font-medium xl:text-base">
+      دسته‌بندی‌ها
+    </p>
+    <ul class="space-y-4">
+      {% for category in categories %}
+        <li>
+          <a href="{% url 'blog:post-list' %}?category_slug={{ category.slug }}" class="group py-2">
+            <div class="flex items-center justify-between">
+              <p class="flex items-center gap-x-2 text-sm text-text/90 transition-all duration-200 group-hover: xl:text-base">
+                <svg class="h-4 w-4">
+                  <use xlink:href="#chevron-left" />
+                </svg>
+                {{ category.name }}
+              </p>
+              <div class="w-6 rounded-lg bg-primary py-px text-center text-sm font-medium text-white dark:bg-emerald-600">
+                {{ category.post_count }}
+              </div>
+            </div>
+          </a>
+        </li>
+      {% empty %}
+        <li class="text-center text-xs text-text/60">دسته‌بندی‌ای یافت نشد</li>
+      {% endfor %}
+    </ul>
+  </div>
+  

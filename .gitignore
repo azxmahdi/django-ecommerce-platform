@@ -1,0 +1,7 @@
+Rotikala 3.1.0/*
+postgres/*
+venv/*
+**/migrations/
+core/static/*
+core/media/*
+envs/*/django/.env

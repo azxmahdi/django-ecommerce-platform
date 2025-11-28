@@ -1,0 +1,252 @@
+{% extends "bases/base.html" %}
+{% load price_filters %}
+
+        {% block content %}
+        <div class="container">
+          <!-- breadCrumb -->
+          <div class="col-span-12 mb-2 rounded-lg bg-muted lg:mb-6">
+            <ol class="grid grid-cols-3 overflow-hidden rounded-lg">
+              <li
+                class="flex flex-col items-center justify-center gap-2 p-4 text-xs text-primary opacity-50 sm:text-sm md:text-base"
+              >
+                <svg class="h-6 w-6 md:h-8 md:w-8">
+                  <use xlink:href="#check" />
+                </svg>
+                <p class="leading-none">سبد خرید</p>
+              </li>
+              <li
+                class="flex flex-col items-center justify-center gap-2 p-4 text-xs text-primary opacity-50 sm:text-sm md:text-base"
+              >
+                <svg class="h-6 w-6 md:h-8 md:w-8">
+                  <use xlink:href="#check" />
+                </svg>
+                <p class="leading-none">شیوه ارسال</p>
+              </li>
+              <li
+                class="flex flex-col items-center justify-center gap-2 bg-primary/10 p-4 text-xs text-primary /10 sm:text-sm md:text-base"
+              >
+                <svg class="h-6 w-6 md:h-8 md:w-8">
+                  <use xlink:href="#credit" />
+                </svg>
+
+                <p class="leading-none">پرداخت</p>
+              </li>
+            </ol>
+          </div>
+
+          <div class="mx-auto max-w-[450px] rounded-lg bg-muted p-5">
+            <!-- Head -->
+            <h1 class="mb-8 text-center text-lg lg:text-xl">جزئیات سفارش</h1>
+
+            <div class="mb-6">
+              <!-- Coupon -->
+              <div class="mb-4 flex items-center justify-between gap-x-2">
+                <div
+                  class="flex w-full items-center justify-between gap-x-2 rounded-lg border pl-4"
+                >
+                  <label
+                    for="coupon"
+                    class="relative block w-full rounded-lg shadow-base"
+                  >
+                    <input
+                      type="text"
+                      id="coupon"
+                      class="text-eft peer w-full rounded-lg border-none bg-transparent px-4 py-3 placeholder-transparent focus:outline-hidden focus:ring-0"
+                      placeholder="کد تخفیف"
+                    />
+
+                    <span
+                      class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-muted px-2 py-0.5 text-sm text-text/90 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-focus:top-0 peer-focus:text-sm"
+                    >
+                      کد تخفیف
+                    </span>
+                  </label>
+                  <button class="btn-primary-nobg py-2 coupon-apply-btn">اعمال</button> <!-- اضافه شدن کلاس -->
+                </div>
+              </div>
+
+              <!-- delivery price -->
+              <div class="flex items-center justify-between gap-x-2 py-6">
+                <div class="text-sm text-text/90 lg:text-base">هزینه ارسال</div>
+
+                 <div class="text-sky-500 dark:text-sky-400  text-sm lg:text-base">
+                      <span class="font-bold">{{ order.shipping_method.price|format_price }}</span>
+                      <span class="text-xs lg:text-sm">تومان</span>
+                  </div> 
+              </div>
+              <!-- delivery price -->
+              <div class="flex items-center justify-between gap-x-2 py-6">
+                <div class="text-sm text-text/90 lg:text-base">تخفیف</div>
+
+                <div
+                  class="text-sm font-medium text-red-500 dark:text-red-400 lg:text-base"
+                >
+                <span id="discount-amount" class="font-bold">
+                  {{ request.session.total_amount_discounts|default:0|add:order.calculate_discount_coupon|format_price }} 
+              </span>
+                  <span class="text-xs lg:text-sm">تومان</span>
+                </div>
+              </div>
+
+              <!-- Order final price -->
+              <div class="flex items-center justify-between gap-x-2 py-6">
+                <div class="text-sm text-text/90 lg:text-base">
+                  مبلغ قابل پرداخت
+                </div>
+
+                <div class="text-sm text-primary lg:text-base">
+                  <span id="final-amount" class="font-bold">{{ order.get_amount|format_price }}</span> <!-- اضافه شدن id -->
+                  <span class="text-xs lg:text-sm">تومان</span>
+                </div>
+              </div>
+              <!-- Payment gateway -->
+              <form method="post" id="main-form">
+                {% csrf_token %}
+                <fieldset
+                  class="flex flex-wrap items-center justify-evenly gap-4 space-y-2"
+                >
+                  <legend class="sr-only">Gateway</legend>
+                  <!-- gateway item -->
+                  {% for gateway in gateways %}
+                  <div>
+                    <input
+                      type="radio"
+                      name="gateway"
+                      value="{{ gateway.id }}"
+                      id="gateway-{{ gateway.id }}"
+                      class="peer hidden"
+                    />
+
+                    <label
+                      for="gateway-{{ gateway.id }}"
+                      class="relative block cursor-pointer rounded-lg border p-4 shadow-base peer-checked:border-emerald-500 hover:border-border/50 dark:peer-checked:border-emerald-400 dark:hover:border-white/10"
+                    >
+                      <div class="flex items-center gap-x-4">
+                        <img
+                          src="{{ gateway.image.url }}"
+                          class="w-8 rounded-lg"
+                          alt=""
+                        />
+                        <p class="text-text/90">{{ gateway.display_name }}</p>
+                      </div>
+                    </label>
+                  </div>
+                  {% endfor %}
+
+                </fieldset>
+              </form>
+            </div>
+            <div>
+              <button form="main-form" type="submit" class="btn-primary py-4"> پرداخت </button>
+            </div>
+          </div>
+        </div>
+        {% endblock content %}
+
+        {% block extra_js %}
+        <script>
+        $(document).ready(function() {
+        
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            const csrftoken = getCookie('csrftoken');
+        
+            function showToast(message, isSuccess = true) {
+                Toastify({
+                    text: message,
+                    duration: 3000,
+                    newWindow: true,
+                    close: true,
+                    gravity: "top", 
+                    position: "left", 
+                    stopOnFocus: true, 
+                    style: {
+                        background: isSuccess ?
+                            "linear-gradient(to right, #00b09b, #96c93d)" : 
+                            "linear-gradient(to right, #ff416c, #ff4b2b)",
+                    },
+                    onClick: function(){} 
+                }).showToast();
+            }
+
+            function formatPriceJS(amount) {
+                return parseFloat(amount).toLocaleString('en-US', { useGrouping: true }).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    .toLocaleString('fa-IR', { useGrouping: false }) ;
+            }
+
+        
+            $(document).on('click', '.coupon-apply-btn', function (e) { 
+                e.preventDefault(); 
+        
+                const $button = $(this);
+                const couponCode = $('#coupon').val();
+                const orderId = "{{ order.id }}"; 
+        
+                if (!couponCode || !orderId) {
+                    showToast("لطفاً کد تخفیف و اطلاعات سفارش را بررسی کنید.", false);
+                    return;
+                }
+        
+                $button.prop('disabled', true).text('در حال پردازش...');
+                $('#coupon').prop('disabled', true);
+        
+                $.ajax({
+                    url: "{% url 'coupon:apply' %}", 
+                    type: "POST",
+                    headers: {
+                        "X-CSRFToken": csrftoken
+                    },
+                    data: {
+                        code: couponCode,
+                        order_id: orderId
+                    },
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.status === "success") {
+                            showToast(response.message, true);
+        
+                            if (response.data) {
+                                if (response.data.total_amount_discounts !== undefined) {
+                                    $('#discount-amount').text(formatPriceJS(response.data.total_amount_discounts));
+                                }
+        
+                                if (response.data.total_payment_amount !== undefined) {
+                                    $('#final-amount').text(formatPriceJS(response.data.total_payment_amount));
+                                }
+                            } else {
+                                console.warn("پاسخ موفقیت آمیز بود اما شامل داده‌های مورد نیاز نبود.");
+                            }
+        
+                        } else if (response.status === "error") {
+                            showToast(response.message, false);
+                        } else {
+                            showToast("پاسخ نامشخص از سرور.", false);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("AJAX Error (Apply Coupon):", status, error);
+                        console.error("Response Text:", xhr.responseText);
+                        showToast("خطای شبکه یا سرور در هنگام اعمال کوپن.", false);
+                    },
+                    complete: function() {
+                        $button.prop('disabled', false).text('اعمال');
+                        $('#coupon').prop('disabled', false);
+                    }
+                });
+            });
+        
+        });
+        </script>
+        {% endblock extra_js %}

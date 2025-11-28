@@ -1,0 +1,17 @@
+{% extends "bases/base_with_cart_icon.html" %}
+
+{% block title %} صفحه مورد نظر یافت نشد {% endblock title %}
+
+{% block content %}
+
+        <div class="mt-10 flex flex-col items-center justify-center gap-y-6">
+          <h1 class="text-9xl font-bold text-text/90">404</h1>
+          <h2 class="text-lg text-text/90 lg:text-xl">
+            صفحه‌ای که دنبال آن بودید پیدا نشد!
+          </h2>
+          <a class="btn-primary px-6 py-3" href="{% url "website:index" %}"
+            >بازگشت به صفحه اصلی</a
+          >
+        </div>
+        
+{% endblock content %}

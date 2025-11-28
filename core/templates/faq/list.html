@@ -1,0 +1,73 @@
+{% extends "bases/base_with_cart_icon.html" %}
+
+{% block title %} سوالات متداول {% endblock title %}
+
+{% block content %}
+<div class="container rounded-lg bg-muted p-5">
+  <div class="mb-8">
+    <div class="mb-5 flex">
+      <h1 class="relative select-none pb-2 text-lg md:text-xl">
+        سوالات متداول
+        <span class="absolute bottom-0 right-0 h-0.5 w-full rounded-full bg-primary"></span>
+      </h1>
+    </div>
+    <p class="mb-5 text-sm text-text/90 xs:text-base">
+      سوال خود را پیدا نکردید ؟
+      <a href="{% url 'contact:form' %}" class="text-primary">با ما تماس بگیرید</a>
+    </p>
+  </div>
+
+  <div class="mb-16 grid grid-cols-12 gap-y-8 md:gap-x-8">
+    <form method="get" action="{% url 'faq:list' %}">
+      <div class="flex items-center justify-between rounded-lg bg-background px-2">
+        <div>
+          <svg class="h-6 w-6">
+            <use xlink:href="#search" />
+          </svg>
+        </div>
+        <label class="sr-only">search faq </label>
+        <input
+          name="q"
+          class="flex grow rounded-lg border-none bg-background px-2 py-3 outline-hidden placeholder:text-sm placeholder:text-text/60 focus:ring-0"
+          placeholder="دنبال چه سوالی میگردید ؟"
+          type="text"
+          value="{{ request.GET.q }}"
+        />
+      </div>
+    </form>
+    
+
+    <div class="col-span-12 space-y-8 md:col-span-8">
+      {% for faq_category in faq_categories %}
+        <div>
+          <div class="mb-4 flex items-center gap-x-2">
+            <span class="h-2 w-2 rounded-full bg-primary"></span>
+            <p class="text-lg font-medium">{{ faq_category.title }}</p>
+          </div>
+          <ul class="mr-2 space-y-4">
+            {% for faq in faq_category.faqs.all %}
+              <li class="relative border-b bg-muted" data-accordion-item>
+                <div class="w-full px-4 py-3 text-right md:px-6 md:py-5 cursor-pointer" data-accordion-button>
+                  <div class="flex items-center justify-between gap-2 text-sm md:text-base">
+                    <span>{{ faq.question }}</span>
+                    <div class="min-w-fit">
+                      <svg data-accordion-chevron class="h-5 w-5 duration-300">
+                        <use xlink:href="#chevron-left"></use>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                <div class="relative max-h-0 overflow-hidden transition-all duration-300" data-accordion-content>
+                  <div class="px-4 py-4 text-sm text-text/80 lg:text-base">
+                    {{ faq.answer|safe }}
+                  </div>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock content %}

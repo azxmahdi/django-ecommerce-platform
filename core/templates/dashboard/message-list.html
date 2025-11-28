@@ -1,0 +1,173 @@
+{% extends "bases/base_dashboard.html" %}
+
+{% block title %} پیام ها {% endblock title %}
+
+
+
+{% block dashboard_content %}
+
+            <!-- content -->
+            <div class="col-span-12 lg:col-span-9">
+              <div class="rounded-lg bg-muted p-5 shadow-base">
+                <div
+                  class="mb-16 flex flex-col items-center justify-between gap-y-8 xs:flex-row"
+                >
+                  <!-- Title -->
+                  <h1 class="relative w-fit text-xl font-medium">
+                    پیام های شما
+                    <span
+                      class="absolute right-0 top-10 h-[3px] w-full rounded-full bg-primary"
+                    >
+                    </span>
+                  </h1>
+
+                  <button class="btn-red w-full px-4 py-2 xs:w-fit" onclick="RemoveAllMessages(this)">
+                    حذف همه
+                  </button>
+                </div>
+                <div class="space-y-4 divide-y">
+                  {% for message in user_messages %}
+                  <!-- item -->
+                  <div class="py-6">
+                    <!-- Title -->
+                    <div class="mb-4 flex items-center gap-x-2 text-sky-500 dark:text-sky-400">
+                      <svg class="h-6 w-6">
+                        <use xlink:href="#notification" />
+                      </svg>
+                      <p class="md:text-lg">{{ message.title }}</p>
+                    </div>
+                    <p class="mb-4 text-sm text-text/90 md:text-base">
+                      {{ message.body }}
+                    </p>
+                    {% if message.order %}
+                    <!-- products slider -->
+                    <div class="swiper notifications-product-swiper mb-6">
+                      <div class="swiper-wrapper">
+                        {% for order_item in message.order.order_items.all %}
+                        <div class="swiper-slide">
+                          <a
+                            href="{% url "shop:product-detail" slug=order_item.product_variant.product.slug %}"
+                            class="flex items-center gap-x-2 rounded-lg border p-2"
+                          >
+                            <img
+                              src="{{ order_item.product_variant.product.image.url }}"
+                              class="w-20"
+                              alt=""
+                            />
+                            <p class="line-clamp-2 text-sm">
+                              {{ order_item.product_variant.product.name }}
+                            </p>
+                          </a>
+                        </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                    
+                    <div class="flex justify-end">
+                      <a href="{% url "dashboard:order-detail" pk=message.order.id %}">
+                        <button
+                          class="btn-primary w-full px-4 py-2 text-sm sm:w-fit"
+                        >
+                          مشاهده جزئیات سفارش
+                          <svg class="h-5 w-5">
+                            <use xlink:href="#chevron-left" />
+                          </svg>
+                        </button>
+                      </a>
+                    </div>
+                    {% endif %}
+                  </div>
+                  {% endfor %}
+                </div>
+
+                {% if not user_messages %}
+                <!-- empty message -->
+                <div class="flex justify-center">
+                  <div
+                    class="flex flex-col items-center justify-center gap-y-4 text-text/60"
+                  >
+                    <svg class="h-20 w-20">
+                      <use xlink:href="#notification-off" />
+                    </svg>
+                    <p class="md:text-xl">لیست پیام های شما خالی میباشد</p>
+                  </div>
+                </div>
+                {% endif %}
+
+                <!-- Pagination -->
+                <div class="flex items-center justify-center gap-x-4 md:justify-end">
+                  {% if page_obj.has_previous %}
+                    <a
+                      class="pagination-button flex items-center justify-center"
+                      href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}"
+                    >
+                      <svg class="h-6 w-6"><use xlink:href="#chevron-right"></use></svg>
+                    </a>
+                  {% endif %}
+                  <div class="flex items-center gap-x-2">
+                    {% for item in page_items %}
+                      {% if item.ellipsis %}
+                        <p class="text-sm text-text/60">...</p>
+                      {% else %}
+                        {% if item.number == page_obj.number %}
+                          <a class="pagination-button pagination-button-active" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ item.number }}">
+                            {{ item.number }}
+                          </a>
+                        {% else %}
+                          <a class="pagination-button" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ item.number }}">
+                            {{ item.number }}
+                          </a>
+                        {% endif %}
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                  {% if page_obj.has_next %}
+                    <a
+                      class="flex h-8 w-8 items-center justify-center rounded-full bg-muted transition-all duration-200 hover:bg-primary hover:text-white hover:dark:bg-emerald-600"
+                      href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}"
+                    >
+                      <svg class="h-6 w-6"><use xlink:href="#chevron-left"></use></svg>
+                    </a>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+      {% endblock dashboard_content %}
+
+
+{% block extra_js %}
+<script>
+  
+
+  function RemoveAllMessages(element) {
+    $.ajax({
+      url: "{% url 'notifications:remove-all-messages' %}",
+      method: 'POST',
+      data: {
+        csrfmiddlewaretoken: '{{ csrf_token }}',
+      },
+      success: function (response) {
+        Toastify({
+          text: response.message,
+          className: `info`,
+          style: {
+            background: "blue",
+          }
+        }).showToast();
+        $(element).toggleClass('active');
+        
+        location.reload();
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.log(errorThrown);
+      }
+    });
+  }
+</script>
+
+
+
+{% endblock extra_js %}

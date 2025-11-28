@@ -1,0 +1,67 @@
+{% load jalali_tags %}
+
+
+<section class="mb-6">
+  <div class="container relative">
+    <!-- Section Header -->
+    <div class="mb-4 flex items-center justify-between">
+      <h3 class="font-medium md:text-lg lg:text-xl">مطالب خواندنی</h3>
+      <a
+        class="flex items-center gap-x-2 py-2 text-sm text-primary lg:text-base"
+        href="{% url "blog:post-list" %}"
+      >
+        مشاهده همه
+        <span>
+          <svg class="h-5 w-5 lg:h-6 lg:w-6">
+            <use xlink:href="#chevron-left" />
+          </svg>
+        </span>
+      </a>
+    </div>
+    <!-- Section Content -->
+    <div class="swiper blog-slider">
+      <div class="swiper-wrapper p-px">
+        {% for post in posts %}
+        <div class="swiper-slide">
+          <div
+            class="border-gradient group relative rounded-base p-px before:absolute before:-inset-px before:h-[calc(100%+2px)] before:w-[calc(100%+2px)] before:rounded-base"
+          >
+            <!-- Blog Card -->
+            <div>
+              <a href="{% url 'blog:post-detail' slug=post.slug %}">
+                <div
+                  class="relative rounded-xl bg-muted p-2 shadow-base"
+                >
+                  <!-- image -->
+                  <div class="mb-2 md:mb-5" draggable="false">
+                    <img
+                      alt="blog"
+                      class="mx-auto w-auto rounded-lg rounded-bl-3xl"
+                      src="{{ post.image.url }}"
+                    />
+                  </div>
+                  <!-- title -->
+                  <div class="mb-2">
+                    <p
+                      class="line-clamp-2 h-10 text-sm md:h-12 md:text-base"
+                    >
+                      {{ post.title }}
+                    </p>
+                  </div>
+                  <div class="flex justify-end">
+                    <p class="text-xs text-primary xs:text-sm">
+                      {{ post.published_date|jalali_date }}
+                    </p>
+                  </div>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="swiper-button-next"></div>
+      <div class="swiper-button-prev"></div>
+    </div>
+  </div>
+</section>

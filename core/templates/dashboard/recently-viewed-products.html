@@ -1,0 +1,184 @@
+{% extends "bases/base_dashboard.html" %}
+    {% block title %}بازدید های اخیر{% endblock title %}
+
+
+    {% block dashboard_content %}
+            <!-- content -->
+            <div class="col-span-12 lg:col-span-9">
+              <div class="rounded-lg bg-muted p-5 shadow-base">
+                <div
+                  class="mb-16 flex flex-col items-center justify-between gap-y-8 xs:flex-row"
+                >
+                  <!-- Title -->
+                  <h1 class="relative w-fit text-xl font-medium">
+                    بازدید های اخیر
+                    <span
+                      class="absolute right-0 top-10 h-[3px] w-full rounded-full bg-primary"
+                    >
+                    </span>
+                  </h1>
+
+                  <button class="btn-red w-full px-4 py-2 xs:w-fit" onclick="RemoveAllRecentlyViewedProducts(this)">
+                    حذف همه
+                  </button>
+                </div>
+                <div
+                  class="mb-8 grid grid-cols-2 gap-1 gap-y-2 xs:gap-4 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                >
+                  {% for product in products %}
+                  <!-- Product Favorite Card -->
+                  <div
+                    class="border-gradient group relative rounded-base border p-px before:absolute before:-inset-px before:h-[calc(100%+2px)] before:w-[calc(100%+2px)] before:rounded-base"
+                  >
+                  
+                    <div
+                      class="relative rounded-xl bg-muted p-2 shadow-base md:p-5"
+                    >
+                      <!-- image -->
+                      <div class="mb-2 md:mb-5" draggable="false">
+                        <a href="{% url "shop:product-detail" slug=product.slug %}">
+                          <img
+                            alt=""
+                            class="mx-auto w-32 rounded-lg md:w-auto"
+                            src="{{ product.image.url }}"
+                          />
+                        </a>
+                      </div>
+                      <!-- title -->
+                      <div class="mb-2">
+                        <a
+                          class="line-clamp-2 h-10 text-sm md:h-12 md:text-base"
+                          href="{% url "shop:product-detail" slug=product.slug %}"
+                        >
+                        {{ product.name }}
+                        </a>
+                      </div>
+                      <div class="flex items-center justify-between">
+                        {% if product.is_available %}
+                        <div
+                          class="text-sm font-medium text-primary xs:text-base"
+                        >
+                          موجود
+                        </div>
+                        {% else %}
+                        <div
+                          class="text-sm font-medium text-red-500 dark:text-red-400 xs:text-base"
+                        >
+                          ناموجود
+                        </div>
+                        {% endif %}
+                        <button
+                          type="button"
+                          class="flex h-10 w-10 items-center justify-center rounded-full bg-background text-red-500 transition-all duration-200 hover:bg-warning hover:text-gray-100 dark:text-red-400 dark:hover:bg-red-400 dark:hover:text-black"
+                          onclick="RemoveRecentlyViewedProduct(this,`{{product.id}}`)"
+                          >
+                          <svg class="h-6 w-6">
+                            <use xlink:href="#trash" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}              
+                </div>
+                <!-- Pagination -->
+                <div class="flex items-center justify-center gap-x-4 md:justify-end">
+                  {% if page_obj.has_previous %}
+                    <a
+                      class="pagination-button flex items-center justify-center"
+                      href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}"
+                    >
+                      <svg class="h-6 w-6"><use xlink:href="#chevron-right"></use></svg>
+                    </a>
+                  {% endif %}
+                  <div class="flex items-center gap-x-2">
+                    {% for item in page_items %}
+                      {% if item.ellipsis %}
+                        <p class="text-sm text-text/60">...</p>
+                      {% else %}
+                        {% if item.number == page_obj.number %}
+                          <a class="pagination-button pagination-button-active" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ item.number }}">
+                            {{ item.number }}
+                          </a>
+                        {% else %}
+                          <a class="pagination-button" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ item.number }}">
+                            {{ item.number }}
+                          </a>
+                        {% endif %}
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                  {% if page_obj.has_next %}
+                    <a
+                      class="flex h-8 w-8 items-center justify-center rounded-full bg-muted transition-all duration-200 hover:bg-primary hover:text-white hover:dark:bg-emerald-600"
+                      href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}"
+                    >
+                      <svg class="h-6 w-6"><use xlink:href="#chevron-left"></use></svg>
+                    </a>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+    </div>
+    {% endblock dashboard_content %}
+{% block extra_js %}
+<script>
+  function RemoveRecentlyViewedProduct(element, product_id) {
+    $.ajax({
+      url: "{% url 'recently_viewed:products:remove-product' %}",
+      method: 'POST',
+      data: {
+        product_id: product_id,
+        csrfmiddlewaretoken: '{{ csrf_token }}'
+      },
+      success: function (response) {
+        Toastify({
+          text: response.message,
+          className: `info`,
+          style: {
+            background: "blue",
+          }
+        }).showToast();
+        $(element).toggleClass('active');
+        
+        location.reload();
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.log(errorThrown);
+      }
+    });
+  }
+
+  function RemoveAllRecentlyViewedProducts(element) {
+    $.ajax({
+      url: "{% url 'recently_viewed:products:remove-all-products' %}",
+      method: 'POST',
+      data: {
+        csrfmiddlewaretoken: '{{ csrf_token }}',
+      },
+      success: function (response) {
+        Toastify({
+          text: response.message,
+          className: `info`,
+          style: {
+            background: "blue",
+          }
+        }).showToast();
+        $(element).toggleClass('active');
+        
+        location.reload();
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.log(errorThrown);
+      }
+    });
+  }
+</script>
+
+
+
+{% endblock extra_js %}

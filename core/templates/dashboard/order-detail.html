@@ -1,0 +1,685 @@
+{% extends "bases/base_dashboard.html" %}
+{% load price_filters jalali_tags payment_tags format_times %}
+
+{% block extra_css %}
+<style>
+  .error-message {
+      color: #dc2626; 
+      background-color: #fef2f2; 
+      padding: 0.75rem;
+      border-radius: 0.375rem;
+      margin-top: 0.5rem;
+      display: {% if messages %}{% for message in messages %}{% if message.tags == 'error' %}block{% else %}none{% endif %}{% endfor %}{% else %}none{% endif %};
+      border: 1px solid #fecaca; 
+  }
+  .repay-form {
+      display: inline; 
+  }
+</style>
+
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="cancel" viewBox="0 0 24 24">
+    <path fill="currentColor" d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10s10-4.47 10-10S17.53 2 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8m3.59-5L12 10.41L8.41 14L7 12.59L10.59 9L7 5.41L8.41 4L12 7.59L15.59 4L17 5.41L13.41 9L17 12.59z"/>
+  </symbol>
+</svg>
+{% endblock extra_css %}
+{% block dashboard_content %}
+            <!-- content -->
+            <div class="col-span-12 lg:col-span-9">
+              <div class="rounded-lg bg-muted p-5 shadow-base">
+                <div
+                  class="mb-16 flex flex-col items-center justify-between gap-y-8 xs:flex-row"
+                >
+                  <!-- Title -->
+                  <h1 class="relative w-fit text-xl font-medium">
+                    جزئیات سفارش {{ order.pk }}#
+                    <span
+                      class="absolute right-0 top-10 h-[3px] w-full rounded-full bg-primary"
+                    >
+                    </span>
+                  </h1>
+                  <a
+                    href="./profile-orders.html"
+                    class="btn-secondary w-full px-4 py-2 xs:w-fit"
+                  >
+                    برگشت
+                    <svg class="h-5 w-5">
+                      <use xlink:href="#chevron-left" />
+                    </svg>
+                  </a>
+                </div>
+                <div class="mb-8">
+                  <div class="rounded-lg border shadow-base">
+                    <div class="p-4">
+                      {% with status_title=order.get_status.title %}
+                      {% if status_title == "SUCCESS" %}
+                      <!-- head -->
+                      <div class="flex items-center justify-between pb-6">
+                        <div class="flex items-center gap-x-2 text-primary">
+                          <svg class="h-6 w-6">
+                            <use xlink:href="#outline-check"></use>
+                          </svg>
+                          <p class="font-medium md:text-lg">پرداخت شده</p>
+                        </div>
+                      </div>
+                      {% elif status_title == "PENDING" %}
+                      <div
+                      class="flex flex-col items-center justify-between gap-4 pb-6 xs:flex-row"
+                    >
+                      <div
+                        class="flex items-center gap-x-2 text-yellow-500 dark:text-yellow-400"
+                      >
+                        <svg class="h-6 w-6">
+                          <use xlink:href="#warning"></use>
+                        </svg>
+                        <p class="font-medium md:text-lg">در انتظار پرداخت</p>
+                      </div>
+                      <button
+                          type="button"
+                          id="repay-button"
+                          class="btn-primary w-full px-4 py-2 text-sm xs:w-32 xs:text-base"
+                          data-order-id="{{ order.pk }}"
+                        >
+                          رفتن به درگاه پرداخت
+                        </button>
+                    </div>
+                    {% elif status_title == "FAILED" %}
+                    <div class="flex items-center justify-between pb-6">
+                      <div class="flex items-center gap-x-2 text-red-500 dark:text-red-400">
+                        <svg class="h-6 w-6">
+                          <use xlink:href="#cancel" />
+                        </svg>
+                        <p class="font-medium md:text-lg">
+                          سفارش لغو شده
+                        </p>
+                      </div>
+
+                      <button
+                          type="button"
+                          id="repay-failed-button"
+                          class="btn-primary w-full px-4 py-2 text-sm xs:w-32 xs:text-base"
+                          data-order-id="{{ order.pk }}"
+                        >
+                          پرداخت مجدد
+                        </button>
+                    </div>
+                      {% endif %}
+                      {% endwith %}
+                      <!-- conent -->
+                      <div
+                        class="flex flex-col gap-6 pb-6 xl:flex-row xl:justify-between xl:gap-16"
+                      >
+                        <div class="flex flex-col gap-4 md:flex-row">
+                          <div
+                            class="flex items-center justify-between gap-x-2 md:justify-start"
+                          >
+                            <div class="text-sm text-text/60 md:text-base">
+                              کد پیگیری سفارش
+                            </div>
+                            <div class="text-sm text-text/90 md:text-base">
+                              {{ order.pk }}
+                            </div>
+                          </div>
+                          <div
+                            class="flex items-center justify-between gap-x-2 md:justify-start"
+                          >
+                            <div class="text-sm text-text/60 md:text-base">
+                              مبلغ کل
+                            </div>
+                            <div class="text-primary">
+                              <span class="font-bold md:text-lg"
+                                >{{ order.get_amount|format_price }}</span
+                              >
+                              <span class="text-sm md:text-base">تومان</span>
+                            </div>
+                          </div>
+                          <div
+                            class="flex items-center justify-between gap-x-2 md:justify-start"
+                          >
+                            <div class="text-sm text-text/60 md:text-base">
+                              تاریخ
+                            </div>
+                            <div class="text-sm text-text/90 md:text-base">
+                              {{ order.created_date|jalali_date }}
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex grow flex-col gap-y-4">
+                          <!-- order status -->
+                          {% with fulfillment_status_title=order.get_fulfillment_status.title %}
+                          {% if fulfillment_status_title == "PENDING_APPROVAL" %}
+                            <div class="flex grow flex-col gap-y-4">
+                                <!-- order status -->
+                                <div class="flex items-center gap-x-2 text-yellow-500 dark:text-yellow-400">
+                                    <svg class="h-5 w-5 md:h-6 md:w-6">
+                                        <use xlink:href="#order-pending" />
+                                    </svg>
+                                    <p class="text-sm font-medium md:text-base">در انتظار تایید</p>
+                                </div>
+                                <!-- order step -->
+                                <div class="relative h-2 w-full rounded-full bg-background dark:bg-zinc-800">
+                                    <span class="absolute inset-y-0 right-0 rounded-full bg-yellow-500 dark:bg-yellow-400" style="width: 25%"></span>
+                                </div>
+                                <!-- order date -->
+                                <div class="flex items-center justify-between text-sm text-yellow-500 dark:text-yellow-400 md:text-base">
+                                    <span> {{ order.updated_date|jalali_date }}</span>
+                                    <span> ساعت {{ order.updated_date|format_time }} </span>
+                                </div>
+                            </div>
+                          {% elif fulfillment_status_title == "PROCESSING" %}
+                              <div class="flex grow flex-col gap-y-4">
+                                  <!-- order status -->
+                                  <div class="flex items-center gap-x-2 text-sky-500 dark:text-sky-400">
+                                      <svg class="h-5 w-5 md:h-6 md:w-6">
+                                          <use xlink:href="#order-process" />
+                                      </svg>
+                                      <p class="text-sm font-medium md:text-base">در حال پردازش</p>
+                                  </div>
+                                  <!-- order step -->
+                                  <div class="relative h-2 w-full rounded-full bg-background dark:bg-zinc-800">
+                                      <span class="absolute inset-y-0 right-0 rounded-full bg-sky-500 dark:bg-sky-400" style="width: 50%"></span>
+                                  </div>
+                                  <!-- order date -->
+                                  <div class="flex items-center justify-between text-sm text-sky-500 dark:text-sky-400 md:text-base">
+                                      <span> {{ order.updated_date|jalali_date }} </span>
+                                      <span> ساعت {{ order.updated_date|format_time }} </span>
+                                  </div>
+                              </div>
+                          {% elif fulfillment_status_title == "SHIPPED" %}
+                              <div class="flex grow flex-col gap-y-4">
+                                  <!-- order status -->
+                                  <div class="flex items-center gap-x-2 text-teal-500 dark:text-teal-400">
+                                      <svg class="h-5 w-5 md:h-6 md:w-6">
+                                          <use xlink:href="#order-sent" />
+                                      </svg>
+                                      <p class="text-sm font-medium md:text-base">ارسال شده</p>
+                                  </div>
+                                  <!-- order step -->
+                                  <div class="relative h-2 w-full rounded-full bg-background dark:bg-zinc-800">
+                                      <span class="absolute inset-y-0 right-0 rounded-full bg-teal-500 dark:bg-teal-400" style="width: 75%"></span>
+                                  </div>
+                                  <!-- order date -->
+                                  <div class="flex items-center justify-between text-sm text-teal-500 dark:text-teal-400 md:text-base">
+                                      <span> {{ order.updated_date|jalali_date }} </span>
+                                      <span> ساعت {{ order.updated_date|format_time }} </span>
+                                  </div>
+                              </div>
+                          {% elif fulfillment_status_title == "DELIVERED" %}
+                              <div class="flex grow flex-col gap-y-4">
+                                  <!-- order status -->
+                                  <div class="flex items-center gap-x-2 text-primary">
+                                      <p class="text-sm font-medium md:text-base">تحویل داده شده</p>
+                                  </div>
+                                  <!-- order step -->
+                                  <div class="relative h-2 w-full rounded-full bg-background dark:bg-zinc-800">
+                                      <span class="absolute inset-y-0 right-0 rounded-full bg-primary" style="width: 100%"></span>
+                                  </div>
+                                  <!-- order date -->
+                                  <div class="flex items-center justify-between text-sm text-primary md:text-base">
+                                      <span> {{ order.updated_date|jalali_date }} </span>
+                                      <span> ساعت {{ order.updated_date|format_time }} </span>
+                                  </div>
+                              </div>
+                          {% elif fulfillment_status_title == "RETURNED" %}
+                              <div class="flex grow flex-col gap-y-4">
+                                  <!-- order status -->
+                                  <div class="flex items-center gap-x-2 text-text/60">
+                                      <svg class="h-5 w-5 md:h-6 md:w-6">
+                                          <use xlink:href="#order-returned" />
+                                      </svg>
+                                      <p class="text-sm font-medium md:text-base">مرجوع شده</p>
+                                  </div>
+                                  <!-- order step -->
+                                  <div class="relative h-2 w-full rounded-full bg-background dark:bg-zinc-800">
+                                      <span class="absolute inset-y-0 right-0 rounded-full bg-zinc-500 dark:bg-zinc-400" style="width: 100%"></span>
+                                  </div>
+                                  <!-- order date -->
+                                  <div class="flex items-center justify-between text-sm text-text/60 md:text-base">
+                                      <span> {{ order.updated_date|jalali_date }} </span>
+                                      <span> ساعت {{ order.updated_date|format_time }} </span>
+                          {% endif %}
+                        {% endwith %}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mb-8">
+                  <div class="rounded-lg border p-4 shadow-base">
+                    <div class="mb-6 flex flex-col gap-4 md:flex-row flex-wrap">
+                      <div
+                        class="flex justify-between gap-x-2 lg:justify-start"
+                      >
+                        <div class="text-sm text-text/60 md:text-base">
+                          مبلغ مرسوله
+                        </div>
+                        <div class="text-primary">
+                          <span class="font-bold md:text-lg">{{ order.calculate_total_price|format_price }}</span>
+                          <span class="text-sm md:text-base">تومان</span>
+                        </div>
+                      </div>
+                      <div
+                        class="flex justify-between gap-x-2 lg:justify-start"
+                      >
+                        <div class="text-sm text-text/60 md:text-base">
+                          تخفیف کالا ها
+                        </div>
+                        <div class="text-red-500 dark:text-red-400">
+                          <span class="font-bold md:text-lg">{{ order.total_discounts|format_price }}</span>
+                          <span class="text-sm md:text-base">تومان</span>
+                        </div>
+                      </div>
+                      <div
+                        class="flex justify-between gap-x-2 lg:justify-start"
+                      >
+                        <div class="text-sm text-text/60 md:text-base">
+                          کد تخفیف
+                        </div>
+                        <div class="text-red-500 dark:text-red-400">
+                          <span class="font-bold md:text-lg"> {% if order.coupon.code %}{{ order.coupon.code }} {% else %} ثبت نشده {% endif %} </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex flex-col gap-4 md:flex-row">
+                      <div
+                        class="flex justify-between gap-x-2 lg:justify-start"
+                      >
+                        <div class="text-sm text-text/60 md:text-base">
+                          روش ارسال
+                        </div>
+                        <div class="text-sm text-text/90 md:text-base">
+                          {{ order.shipping_method.name }}
+                        </div>
+                      </div>
+                      <div
+                        class="flex justify-between gap-x-2 lg:justify-start"
+                      >
+                        <div class="text-sm text-text/60 md:text-base">
+                          هزینه ارسال
+                        </div>
+                        <div class="text-primary">
+                          <span class="font-bold md:text-lg">{{ order.shipping_method.price|format_price }}</span>
+                          <span class="text-sm md:text-base">تومان</span>
+                        </div>
+                      </div>
+                      <div
+                        class="flex justify-between gap-x-2 lg:justify-start"
+                      >
+                        <div class="text-sm text-text/60 md:text-base">
+                          کد پیگیری مرسوله
+                        </div>
+                        <div class="text-sm text-text/90 md:text-base">
+                          {% if order.shipping_method.tracking_number %} {{ order.shipping_method.tracking_number }} {% else %} ثبت نشده {% endif %}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                
+                
+                
+                
+                <input type="hidden" id="form-address-id" name="address_id" value="{{ order.address.id }}">
+
+
+
+
+
+                <div class="mb-8">
+                  <h2
+                    class="mb-8 flex items-center gap-x-4 text-lg text-text/90"
+                  >
+                    <span class="h-2 w-2 rounded-full bg-primary"></span>
+                    آدرس تحویل سفارش
+                  </h2>
+                  <div
+                    class="block rounded-lg border p-4 shadow-base hover:border-border/50 dark:hover:border-white/10"
+                  >
+                    <div
+                      class="mb-4 flex items-center justify-between gap-x-2 sm:mb-2"
+                    >
+                      <p
+                        class="line-clamp-2 h-10 text-sm text-text/90 xs:text-base sm:line-clamp-1 sm:h-6"
+                        id="current-address-text"
+                      >
+                        {{ order.address.get_full_address }}
+                      </p>
+                    </div>
+                    <div class="flex items-center justify-between gap-x-2">
+                      <p class="line-clamp-1 text-sm text-text/60" id="current-name-text">
+                        {{ order.address.get_full_name }}
+                      </p>
+                      {% if order.get_status.title == "FAILED" %}
+                      <div>
+                        <button
+                          data-modal-target="address-change-modal"
+                          data-modal-toggle="address-change-modal"
+                          class="btn-primary-nobg text-sm xs:px-4 xs:py-2 md:text-base"
+                        >
+                          <svg class="h-5 w-5">
+                            <use xlink:href="#address-edit" />
+                          </svg>
+                          تغییر آدرس تحویل
+                        </button>
+                      </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+                <div class="mb-8">
+                  <h2
+                    class="mb-8 flex items-center gap-x-4 text-lg text-text/90"
+                  >
+                    <span class="h-2 w-2 rounded-full bg-primary"></span>
+                    اقلام سفارش
+                    <span class="text-sm text-text/60"> ( {{ order.order_items.all|length }} کالا ) </span>
+                  </h2>
+                  <ul class="divide-y">
+                    {% for order_item in order.order_items.all %}
+                    <!-- Cart Item-->
+                    <li>
+                      <div class="py-4 sm:py-6">
+                        <div
+                          class="grid grid-cols-2 items-center justify-start gap-2 xs:grid-cols-3 xs:gap-6 sm:grid-cols-4 xl:grid-cols-6"
+                        >
+                          <!-- Image -->
+                          <div class="row-span-2 min-w-fit xs:mx-auto">
+                            <a href="{% url "shop:product-detail" slug=order_item.product_variant.product.slug %}">
+                              <img
+                                alt=""
+                                class="w-25 rounded-lg sm:w-28"
+                                src="{{ order_item.product_variant.product.image.url }}"
+                              />
+                            </a>
+                          </div>
+                          <!-- Detail -->
+                          <div
+                            class="row-span-2 space-y-4 xs:col-span-2 sm:col-span-3 xl:col-span-5"
+                          >
+                            <!-- Title -->
+                            <a
+                              class="line-clamp-2 text-sm md:text-base"
+                              href="{% url "shop:product-detail" slug=order_item.product_variant.product.slug %}"
+                            >
+                            {{ order_item.product_variant.product.name }}
+                            </a>
+                            <!-- Variant -->
+                            <div class="flex items-center gap-x-2">
+                              <span class="text-xs text-text/90 xs:text-sm">
+                                {{ order_item.product_variant.attribute_value.value }}</span
+                              >
+                            </div>
+                            <div
+                              class="flex flex-col items-start gap-x-2 text-red-500 dark:text-red-400 xs:flex-row xs:items-center"
+                            >
+                              <div class="text-xs xs:text-sm">تخفیف</div>
+                              <div class="text-red-500 dark:text-red-400">
+                                <span class="text-sm font-bold"
+                                  > {{ order_item.total_discounts|format_price }} </span
+                                >
+                                <span class="text-xs xs:text-sm">تومان</span>
+                              </div>
+                            </div>
+                          </div>
+                          <!-- Quantity -->
+                          <div
+                            class="flex items-center gap-x-2 xs:justify-center"
+                          >
+                            <div
+                              class="flex h-10 w-24 items-center justify-center gap-x-3 rounded-lg border px-4 py-1 sm:w-28"
+                            >
+                              <div
+                                class="flex h-5 w-5 select-none items-center justify-center text-sm font-medium sm:h-6 sm:w-6 sm:text-lg"
+                              >
+                                {{ order_item.quantity }}
+                              </div>
+                            </div>
+                          </div>
+                          <!-- Price -->
+                          <div
+                            class="row-span-2 xs:col-span-2 sm:col-span-3 xl:col-span-5"
+                          >
+                            <div
+                              class="text-primary xs:col-span-2 sm:col-span-3 lg:text-lg xl:col-span-5"
+                            >
+                              <span class="font-bold">{{ order_item.total_price|format_price }}</span>
+                              <span class="text-sm lg:text-base">تومان</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Address Change modal -->
+      <div
+        id="address-change-modal"
+        tabindex="-1"
+        aria-hidden="true"
+        class="main-scroll fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full overflow-y-auto overflow-x-hidden p-4 md:inset-0"
+      >
+        <div class="relative max-h-full w-full max-w-2xl">
+          <div
+            class="divide-y overflow-hidden rounded-lg bg-muted shadow-sm ring-1 ring-gray-100 dark:ring-white/5"
+          >
+            <div class="px-4 py-5 sm:px-6">
+              <div class="flex items-center justify-between">
+                <h3 class="md:text-lg">تغییر آدرس تحویل</h3>
+
+                <button
+                  class=" "
+                  data-modal-hide="address-change-modal"
+                  type="button"
+                  id="close-modal-btn"
+                >
+                  <svg class="h-5 w-5">
+                    <use xlink:href="#close" />
+                  </svg>
+
+                  <span class="sr-only">Close menu</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="space-y-6 px-4 py-5 sm:p-6">
+              <fieldset class="space-y-6">
+                <legend class="sr-only">Address</legend>
+                {% for address in addresses %}
+                <div>
+                  <input
+                    type="radio"
+                    name="address"
+                    value="{{ address.id }}"
+                    id="address-{{ address.id }}"
+                    class="peer hidden"
+                  />
+                  <label
+                    for="address-{{ address.id }}"
+                    class="relative block cursor-pointer rounded-lg border p-4 shadow-base peer-checked:border-emerald-500 hover:border-border/50 dark:peer-checked:border-emerald-400 dark:hover:border-white/10"
+                  >
+                    <div
+                      class="mb-4 flex items-center justify-between gap-x-2 sm:mb-2"
+                    >
+                      <p
+                        class="line-clamp-2 h-10 text-sm text-text/90 xs:text-base sm:line-clamp-1 sm:h-6"
+                        data-full-address="{{ address.get_full_address }}"
+                        data-full-name="{{ address.get_full_name }}"
+                      >
+                      {{ address.get_full_address }}
+                      </p>
+                    </div>
+                    <p class="line-clamp-1 text-sm text-text/60">
+                      {{ address.get_full_name }}
+                    </p>
+                  </label>
+                </div>
+                {% endfor %}
+              </fieldset>
+              <div class="flex justify-end">
+                <button
+                  type="button"
+                  id="confirm-new-address-btn"
+                  name="confirm_new_address"
+                  class="btn-primary w-full px-4 py-2 md:w-auto"
+                >
+                  <span>
+                    <svg class="h-5 w-5">
+                      <use xlink:href="#address-edit" />
+                    </svg>
+                  </span>
+                  <span> تایید آدرس جدید </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+    </div>
+    {% endblock dashboard_content %}
+    {% block extra_js %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>
+    $(document).ready(function() {
+        function showToast(message, type) {
+            let backgroundColor = "#ef4444";
+            if (type === "success") {
+                backgroundColor = "#22c55e";
+            }
+            Toastify({
+                text: message,
+                duration: 3000,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+                style: {
+                    background: backgroundColor,
+                }
+            }).showToast();
+        }
+    
+        $('#repay-failed-button').click(function(e) {
+            e.preventDefault();
+            const orderId = $(this).data('order-id');
+            const addressId = $('#form-address-id').val();
+    
+            if (!orderId) {
+                showToast("خطا: شناسه سفارش یافت نشد.", "error");
+                return;
+            }
+    
+            $.ajax({
+                url: "{% url 'dashboard:repayment' %}",
+                method: "POST",
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                data: {
+                    'order_id': orderId,
+                    'address_id': addressId,
+                },
+                success: function(response) {
+                    if (response.status === "success") {
+                        window.location.href = "{% url 'payment:process' %}";
+                    } else {
+                        showToast(response.message || "خطا در پردازش پرداخت مجدد.", "error");
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Ajax Error for repayment:", xhr, status, error);
+                    showToast("خطا در ارتباط با سرور برای پرداخت مجدد.", "error");
+                }
+            });
+        });
+    
+        $('#repay-button').click(function(e) {
+            e.preventDefault();
+            const orderId = $(this).data('order-id');
+            
+            if (!orderId) {
+                showToast("خطا: شناسه سفارش یافت نشد.", "error");
+                return;
+            }
+    
+            $.ajax({
+                url: "{% url 'dashboard:generate-payment-url' %}",
+                method: "GET",
+                data: {
+                    'order_id': orderId,
+                },
+                success: function(response) {
+                    if (response.status === "success") {
+                        if (response.payment_url) {
+                            window.location.href = response.payment_url;
+                        } else {
+                            showToast("خطا: URL درگاه یافت نشد.", "error");
+                        }
+                    } else if (response.status === "error") {
+                        showToast(response.message || "خطایی رخ داد.", "error");
+                    } else {
+                        showToast("پاسخ نامشخص از سرور.", "error");
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Ajax Error:", xhr, status, error);
+                    showToast("خطا در ارتباط با سرور.", "error");
+                }
+            });
+        });
+    
+        $('#confirm-new-address-btn').click(function() {
+            var selectedAddressRadio = $('input[name="address"]:checked');
+            if (selectedAddressRadio.length) {
+                var addressId = selectedAddressRadio.val();
+    
+                $.ajax({
+                    url: "{% url 'dashboard:get-address-details' %}",
+                    method: "POST",
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    data: {
+                        'address_id': addressId,
+                    },
+                    success: function(response) {
+                        if (response.status === 'success' && response.data) {
+                            $('#form-address-id').val(addressId);
+                            $('#current-address-text').text(response.data.full_address);
+                            $('#current-name-text').text(response.data.full_name);
+                            
+                            $('button[data-modal-hide="address-change-modal"]').trigger('click');
+                            showToast("آدرس با موفقیت تغییر یافت.", "success");
+                        } else {
+                            showToast(response.message || 'خطا در دریافت اطلاعات آدرس.', 'error');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Ajax Error for address details:", xhr, status, error);
+                        showToast("خطا در دریافت اطلاعات آدرس.", "error");
+                    }
+                });
+            } else {
+                showToast("لطفاً یک آدرس را انتخاب کنید.", "error");
+            }
+        });
+    
+        $('button[data-modal-hide="address-change-modal"]').click(function() {
+            $('#address-change-modal').addClass('hidden');
+        });
+    });
+    </script>
+    {% endblock extra_js %}

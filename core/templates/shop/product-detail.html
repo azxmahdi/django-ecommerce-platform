@@ -1,0 +1,1622 @@
+{% extends "bases/base_with_cart_icon.html" %}
+{% load jalali_tags static price_filters %}
+{% block title %} جزئیات محصول {% endblock title %}
+{% block content %}
+<div class="container">
+  <!-- Desktop Product Detail -->
+  <div class="hidden lg:block">
+    <!-- Breadcrumb -->
+    <div class="mb-6">
+      <nav aria-label="Breadcrumb" class="w-fit rounded-lg bg-muted px-4 py-4 shadow-base">
+        <ol class="flex flex-wrap items-center justify-center gap-x-2 gap-y-4">
+          <li class="flex items-center gap-x-2">
+            <a href="{% url "website:index" %}" class="text-sm text-text/90 hover: hover:">روتی کالا</a>
+            <span class="text-text/90">
+              <svg class="h-5 w-5">
+                <use xlink:href="#chevron-left" />
+              </svg>
+            </span>
+          </li>
+          <li class="flex items-center gap-x-2">
+            <a href="{% url "shop:product-list" %}?category_slug={{ product.category.parent.parent.slug }}" class="text-sm text-text/90 hover: hover:">{{ product.category.parent.parent }}</a>
+            <span class="text-text/90">
+              <svg class="h-5 w-5">
+                <use xlink:href="#chevron-left" />
+              </svg>
+            </span>
+          </li>
+          <li class="flex items-center gap-x-2">
+            <a href="{% url "shop:product-list" %}?category_slug={{ product.category.parent.slug }}" class="text-sm text-text/90 hover: hover:">{{ product.category.parent }}</a>
+            <span class="text-text/90">
+              <svg class="h-5 w-5">
+                <use xlink:href="#chevron-left" />
+              </svg>
+            </span>
+          </li>
+          <li class="flex items-center gap-x-2">
+            <a href="{% url "shop:product-list" %}?category_slug={{ product.category.slug }}" class="text-sm text-text/90 hover: hover:">{{ product.category }}</a>
+            <span class="text-text/90">
+              <svg class="h-5 w-5">
+                <use xlink:href="#chevron-left" />
+              </svg>
+            </span>
+          </li>
+          <li class="flex items-center gap-x-2">
+            <a href="#" class="text-sm text-text/90 hover: hover:">{{ product.name }}</a>
+          </li>
+        </ol>
+      </nav>
+    </div>
+    <!-- Product Info -->
+    <div class="grid grid-cols-12 gap-y-8 md:gap-8">
+      <!-- Gallery -->
+      <div class="col-span-12 md:col-span-5 lg:col-span-4">
+        <div class="sticky top-24">
+          {% if request.user.is_authenticated %}
+          <!-- Action Buttons -->
+          <div class="mb-4 flex items-center justify-center gap-x-4">
+            <button id="add-to-favorite-desktop" type="button" class="favorite-btn flex h-10 w-10 items-center justify-center rounded-full border shadow-base transition-all duration-300 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20" onclick="addToWishlist(this,`{{product.id}}`)">
+              <svg class="h-6 w-6">
+                <use xlink:href="#heart" />
+              </svg>
+            </button>
+          </div>
+          {% endif %}
+          <!-- Main Image -->
+          <div class="relative mb-4 overflow-hidden rounded-lg border shadow-base flex items-center justify-center bg-gray-100 min-h-[300px]">
+            <img id="main-product-image" src="{{ product.image.url }}" alt="کفش پیاده روی مردانه نیو بالانس" class="mx-auto transition-opacity duration-300 max-h-[280px]" loading="lazy" />
+            <!-- Navigation Arrows -->
+            <button id="prev-image-desktop" type="button" class="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-md transition-all duration-300 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-700">
+              <svg class="h-5 w-5">
+                <use xlink:href="#chevron-right" />
+              </svg>
+            </button>
+            <button id="next-image-desktop" type="button" class="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-md transition-all duration-300 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-700">
+              <svg class="h-5 w-5">
+                <use xlink:href="#chevron-left" />
+              </svg>
+            </button>
+          </div>
+          <!-- Thumbnails -->
+          <div class="grid grid-cols-4 gap-2">
+            {% for extra_image in extra_images %}
+            <button type="button" class="thumbnail-btn overflow-hidden rounded-lg border shadow-base transition-all duration-300 hover:border-primary">
+              <img src="{{ extra_image.file.url }}" alt="تصویر کوچک 1" class="mx-auto h-16 object-cover w-full" loading="lazy" />
+            </button>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <!-- Details -->
+      <div class="col-span-12 md:col-span-7 lg:col-span-5">
+        <div class="space-y-6">
+          <div>
+            <h1 class="text-xl font-bold md:text-2xl">{{ product.name }}</h1>
+            <div class="mt-2 flex items-center gap-x-2">
+              <div class="flex items-center gap-x-1">
+                <svg class="h-5 w-5 text-yellow-400">
+                  <use xlink:href="#star" />
+                </svg>
+                <svg class="h-5 w-5 text-yellow-400">
+                  <use xlink:href="#star" />
+                </svg>
+                <svg class="h-5 w-5 text-yellow-400">
+                  <use xlink:href="#star" />
+                </svg>
+                <svg class="h-5 w-5 text-yellow-400">
+                  <use xlink:href="#star" />
+                </svg>
+                <svg class="h-5 w-5 text-yellow-400">
+                  <use xlink:href="#star" />
+                </svg>
+              </div>
+              <div class="text-sm text-text/60">({{ comments.count }} نظر)</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-x-4" id="product-price-container">
+            <div class="flex items-center gap-x-2">
+              <div id="final-price" class="text-2xl font-bold text-primary">انتخاب کنید</div>
+              <div id="base-price-container">
+                <del id="base-price" class="text-sm text-text/60 decoration-warning hidden"></del>
+              </div>
+              <div id="discount-percent-container">
+                <div id="discount-percent" class="flex w-10 items-center justify-center rounded-full bg-warning py-0.5 text-sm font-bold text-white dark:bg-red-600 hidden"></div>
+              </div>
+            </div>
+          </div>
+          <div class="space-y-4">
+            {% for attr_name, values in grouped_attributes.items %}
+              <div class="mb-4 text-sm md:text-base">{{ attr_name }}</div>
+              <fieldset class="mb-4 flex flex-wrap items-center gap-2 attribute-fieldset" data-attribute-name="{{ attr_name }}">
+                {% for val in values %}
+                  <div>
+                    <input type="radio"
+                           id="{{ attr_name|slugify }}-{{ val|slugify }}"
+                           name="{{ attr_name }}"
+                           value="{{ val }}"
+                           class="peer hidden attribute-radio" />
+                    <label for="{{ attr_name|slugify }}-{{ val|slugify }}"
+                           class="relative block cursor-pointer rounded-full border-2 p-2 shadow-base peer-checked:border-emerald-500 hover:border-border/50 dark:peer-checked:border-emerald-400 dark:hover:border-white/10">
+                      <div class="flex items-center gap-x-2">
+                        <p class="text-sm text-text/90 md:text-base">{{ val }}</p>
+                      </div>
+                    </label>
+                  </div>
+                {% endfor %}
+              </fieldset>
+            {% endfor %}
+            <div>
+              <div class="mb-4 text-sm md:text-base">انتخاب تعداد</div>
+              <div class="flex h-12 w-40 items-center justify-between rounded-lg border px-4 py-1">
+                <button type="button" id="decrement-btn" data-action="decrement">
+                  <svg class="h-7 w-7 text-red-600 dark:text-red-500">
+                    <use xlink:href="#minus" />
+                  </svg>
+                </button>
+                <input id="quantity-input" value="1" type="number" min="1" class="flex h-6 w-6 w-full select-none items-center justify-center bg-transparent text-center outline-hidden" />
+                <button type="button" id="increment-btn" data-action="increment">
+                  <svg class="h-7 w-7 text-primary">
+                    <use xlink:href="#plus" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-4">
+            <button id="add-to-cart-btn" class="btn-primary flex-1 px-4 py-3 bg-gray-400 text-white cursor-not-allowed opacity-50" disabled>افزودن به سبد خرید</button>
+          </div>
+          <div class="space-y-4">
+            <div class="flex items-center gap-x-2 rounded-lg border px-4 py-3 text-sm text-text/60">
+              <svg class="h-5 w-5">
+                <use xlink:href="#refund" />
+              </svg>
+              هفت روز ضمانت بازگشت کالا
+            </div>
+            <div class="flex items-center gap-x-2 rounded-lg border px-4 py-3 text-sm text-text/60">
+              <svg class="h-5 w-5">
+                <use xlink:href="#original" />
+              </svg>
+              ضمانت اصالت کالا
+            </div>
+            <div class="flex items-center gap-x-2 rounded-lg border px-4 py-3 text-sm text-text/60">
+              <svg class="h-5 w-5">
+                <use xlink:href="#fast-delivery" />
+              </svg>
+              ارسال سریع
+            </div>
+            <div class="flex items-center gap-x-2 rounded-lg border px-4 py-3 text-sm text-text/60">
+              <svg class="h-5 w-5">
+                <use xlink:href="#support" />
+              </svg>
+              پشتیبانی 24 ساعته
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Description -->
+    <div class="mt-24">
+      <div class="relative mb-8 w-fit text-xl font-medium">توضیحات محصول
+        <span class="absolute right-0 top-10 h-[3px] w-full rounded-full bg-primary"></span>
+      </div>
+      <div id="descriptionContainer" class="max-h-[500px] overflow-hidden transition-all duration-300">
+        {{ product.description }}
+      </div>
+      <button id="toggleDescriptionButton" class="mt-4 flex items-center gap-x-2 text-blue-500 transition-all duration-300">
+        مشاهده بیشتر
+        <svg class="h-5 w-5 transform transition-transform duration-300">
+          <use xlink:href="#chevron-left" />
+        </svg>
+      </button>
+    </div>
+    <!-- Specifications -->
+    <div class="mt-24">
+      <div class="relative mb-8 w-fit text-xl font-medium">مشخصات محصول
+        <span class="absolute right-0 top-10 h-[3px] w-full rounded-full bg-primary"></span>
+      </div>
+      <div class="overflow-hidden rounded-lg border shadow-base">
+        <table class="w-full text-sm">
+          <tbody>
+            {% for product_feature in product_features  %}
+            <tr class="border-b">
+              <td class="w-1/3 bg-muted p-4 font-medium">{{ product_feature.feature.name }}</td>
+              <td class="p-4">{% if product_feature.option %} {{ product_feature.option }} {% else %} {{ product_feature.value }} {% endif %}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Comments -->
+    <div class="mt-24">
+      <div class="relative mb-8 w-fit text-xl font-medium">دیدگاه ها
+        <span class="absolute right-0 top-10 h-[3px] w-full rounded-full bg-primary"></span>
+      </div>
+      <div class="grid grid-cols-12 gap-y-8 md:gap-8">
+        <!-- Submit New Comment -->
+        <div class="col-span-12 md:col-span-4 lg:col-span-3">
+          <form method="post" action="{% url 'review:product-comment-create' %}">
+            {% csrf_token %}
+            <input type="hidden" name="product" value="{{ product.id }}">
+            <input type="hidden" name="parent" value=""> <!-- برای نظر جدید، parent خالی است -->
+            <div class="rounded-lg border p-4 shadow-base">
+              <h3 class="mb-4 font-medium">دیدگاه خود را بنویسید</h3>
+              <div class="space-y-4">
+                <div>
+                  <label for="title" class="relative block rounded-lg border shadow-base">
+                    <input type="text" id="title" name="title" class="peer w-full rounded-lg border-none bg-transparent px-4 py-3 placeholder-transparent focus:outline-hidden focus:ring-0" placeholder="عنوان دیدگاه" />
+                    <span class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-muted px-2 py-0.5 text-sm text-text/90 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-focus:top-0 peer-focus:text-sm">عنوان دیدگاه</span>
+                  </label>
+                </div>
+                <div>
+                  <label for="comment" class="relative block rounded-lg border shadow-base">
+                    <textarea type="text" id="comment" name="text" rows="3" class="peer w-full rounded-lg border-none bg-transparent px-4 py-3 placeholder-transparent focus:outline-hidden focus:ring-0" placeholder="متن دیدگاه"></textarea>
+                    <span class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-muted px-2 py-0.5 text-sm text-text/90 transition-all peer-placeholder-shown:top-6 peer-placeholder-shown:text-base peer-focus:top-0 peer-focus:text-sm">متن دیدگاه</span>
+                  </label>
+                </div>
+                <div class="flex items-center gap-x-4">
+                  <div class="text-sm text-text/60">این محصول را به دیگران پیشنهاد</div>
+                  <fieldset class="flex items-center gap-4">
+                    <legend class="sr-only">Suggestion</legend>
+                    <div class="flex items-center gap-x-2">
+                      <input checked type="radio" id="suggestion-yes" name="is_recommended" value="True" class="peer hidden" />
+                      <label for="suggestion-yes" class="cursor-pointer rounded-lg border px-4 py-2 text-sm peer-checked:border-emerald-500 peer-checked:text-emerald-500">بله</label>
+                    </div>
+                    <div class="flex items-center gap-x-2">
+                      <input type="radio" id="suggestion-no" name="is_recommended" value="False" class="peer hidden" />
+                      <label for="suggestion-no" class="cursor-pointer rounded-lg border px-4 py-2 text-sm peer-checked:border-emerald-500 peer-checked:text-emerald-500">خیر</label>
+                    </div>
+                  </fieldset>
+                </div>
+                <div class="flex justify-end">
+                  <button type="submit" class="btn-primary w-full px-4 py-2 md:w-auto bg-emerald-500 hover:bg-emerald-600 text-white">ارسال دیدگاه</button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <!-- Comments List -->
+        <div class="col-span-12 md:col-span-8 lg:col-span-9">
+          <div id="commentsContainer" class="max-h-[500px] overflow-hidden transition-all duration-300">
+            <ul class="space-y-4 divide-y divide-gray-200 dark:divide-white/10">
+              {% for comment in comments %}
+              <li class="space-y-2">
+                <div class="py-6">
+                  <div class="flex items-center justify-between gap-2">
+                    <h5 class="mb-4 leading-relaxed xl:text-lg">{{ comment.title }}</h5>
+                    <button type="button"
+                      class="btn-secondary-nobg reply-btn text-blue-500 hover:text-blue-600 
+                            dark:text-blue-400 dark:hover:text-blue-500"
+                      data-comment-id="{{ comment.id }}">
+                      پاسخ
+                      <svg class="w-5 h-5">
+                        <use xlink:href="#chevron-left" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="mb-6 flex items-center gap-x-4 border-b pb-6">
+                    {% if comment.is_recommended %}
+                    <div class="flex items-center gap-x-2 text-primary">
+                      <svg class="h-5 w-5">
+                        <use xlink:href="#like" />
+                      </svg>
+                      پیشنهاد میکنم
+                    </div>
+                    {% else %}
+                    <div class="flex items-center gap-x-2 text-red-500 dark:text-red-400">
+                      <svg class="h-5 w-5">
+                        <use xlink:href="#dislike" />
+                      </svg>
+                      پیشنهاد نمیکنم
+                    </div>
+                    {% endif %}
+                    <div class="flex items-center gap-x-2">
+                      <div class="text-sm text-text/60">{{ comment.created_date|jalali_date }}</div>
+                      <span class="h-3 w-px rounded-full bg-background dark:bg-muted/10"></span>
+                      <div class="text-sm text-text/60">{{ comment.user.get_status.label }}</div>
+                    </div>
+                  </div>
+                  <div class="mb-6 border-b pb-6">
+                    <p class="line-clamp-4 text-sm text-text/90">
+                      {{ comment.text }}
+                    </p>
+                  </div>
+                  <div class="flex items-center justify-end gap-x-8">
+                    <div class="text-sm text-text/60">آیا این دیدگاه برایتان مفید بود؟</div>
+                  
+                    <button 
+                        class="like-btn flex items-center gap-x-2 text-gray-500 transition-all duration-200 hover:text-emerald-400" 
+                        data-comment-id="{{ comment.id }}">
+                      <span class="like-count text-sm">{{ comment.likes }}</span>
+                      <svg class="h-6 w-6"><use xlink:href="#like" /></svg>
+                    </button>
+                  
+                    <button 
+                        class="dislike-btn flex items-center gap-x-2 text-gray-500 transition-all duration-200 hover:text-red-400" 
+                        data-comment-id="{{ comment.id }}">
+                      <span class="dislike-count text-sm">{{ comment.dislikes }}</span>
+                      <svg class="h-6 w-6"><use xlink:href="#dislike" /></svg>
+                    </button>
+                  </div>
+                  
+                </div>
+                {% if comment.prefetched_replies %}
+                <ul class="space-y-4 pl-8 mt-4 border-l-2 border-gray-200 dark:border-white/10 hidden"> 
+                    {% for reply in comment.prefetched_replies %} 
+                    <li class="space-y-2">
+                        <div class="py-4">
+                            <div class="flex items-center justify-between gap-2">
+                                <h5 class="mb-2 leading-relaxed xl:text-lg text-gray-700 dark:text-text-300">{{ reply.title }}</h5>
+                                <button type="button"
+                                  class="btn-secondary-nobg reply-to-reply-btn text-blue-500 hover:text-blue-600 
+                                        dark:text-blue-400 dark:hover:text-blue-500"
+                                  data-comment-id="{{ reply.id }}">
+                                  پاسخ
+                                  <svg class="w-5 h-5">
+                                    <use xlink:href="#chevron-left" />
+                                  </svg>
+                                </button>
+                            </div>
+                            <div class="mb-4 flex items-center gap-x-4 border-b pb-4">
+                                <div class="flex items-center gap-x-2 text-sm text-text/60">
+                                    <span>{{ reply.created_date|jalali_date }}</span>
+                                    <span class="h-3 w-px rounded-full bg-background dark:bg-muted/10"></span>
+                                    <div class="text-sm text-text/60">{{ reply.user.get_status.label }}</div>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <p class="text-sm text-text/90">
+                                    {{ reply.text }}
+                                </p>
+                            </div>
+                            <div class="flex items-center justify-end gap-x-8">
+                              <div class="text-sm text-text/60">آیا این پاسخ برایتان مفید بود؟</div>
+                            
+                              <button 
+                                  class="like-btn flex items-center gap-x-2 text-gray-500 transition-all duration-200 hover:text-emerald-400" 
+                                  data-comment-id="{{ reply.id }}">
+                                <span class="like-count text-sm">{{ reply.likes }}</span>
+                                <svg class="h-6 w-6"><use xlink:href="#like" /></svg>
+                              </button>
+                            
+                              <button 
+                                  class="dislike-btn flex items-center gap-x-2 text-gray-500 transition-all duration-200 hover:text-red-400" 
+                                  data-comment-id="{{ reply.id }}">
+                                <span class="dislike-count text-sm">{{ reply.dislikes }}</span>
+                                <svg class="h-6 w-6"><use xlink:href="#dislike" /></svg>
+                              </button>
+                            </div>
+                            
+                            
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+          <div class="mt-4 flex justify-center">
+            <button id="toggleCommentsButton" class="btn-secondary-nobg text-blue-500">
+              مشاهده بیشتر
+              <svg class="h-5 w-5 transform transition-transform duration-300">
+                <use xlink:href="#chevron-left" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Mobile Product Detail -->
+  <div class="lg:hidden">
+    <!-- breadcrumb -->
+    <div class="mb-4 flex flex-wrap items-center gap-2">
+      <div class="flex items-center gap-x-1 text-sm font-light text-primary sm:text-base md:text-base">
+        <a href="{% url "website:index" %}"> روتی کالا </a>
+        <svg class="h-5 w-5">
+          <use xlink:href="#chevron-left" />
+        </svg>
+      </div>
+      <div class="flex items-center gap-x-1 text-sm font-light text-primary sm:text-base md:text-base">
+        <a href="{% url "shop:product-list" %}?category_slug={{product.category.parent.parent.slug}}"> {{ product.category.parent.parent }} </a>
+        <svg class="h-5 w-5">
+          <use xlink:href="#chevron-left" />
+        </svg>
+      </div>
+      <div class="flex items-center gap-x-1 text-sm font-light text-primary sm:text-base md:text-base">
+        <a href="{% url "shop:product-list" %}?category_slug={{product.category.parent.slug}}">{{ product.category.parent }}</a>
+        <svg class="h-5 w-5">
+          <use xlink:href="#chevron-left" />
+        </svg>
+      </div>
+      <div class="line-clamp-1 text-sm font-light text-primary sm:text-base md:text-base">
+        <a href="{% url "shop:product-list" %}?category_slug={{product.category.slug}}">{{ product.category }}</a>
+      </div>
+    </div>
+    <!-- Gallery -->
+    <div class="mb-4">
+      <div class="relative overflow-hidden rounded-lg border shadow-base">
+        <img id="mobile-main-image" src="{{ product.image.url }}" alt="{{ product.name }}" class="mx-auto transition-opacity duration-300" loading="lazy" />
+        <div class="absolute top-4 left-4 flex items-center gap-x-2">
+            <button id="add-to-favorite-mobile" type="button" class="favorite-btn flex h-10 w-10 items-center justify-center rounded-full border shadow-base transition-all duration-300 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20" onclick="addToWishlist(this,`{{product.id}}`)">
+              <svg class="h-6 w-6">
+                <use xlink:href="#heart" />
+              </svg>
+            </button>
+          </div>
+        <div class="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-x-2">
+          <button id="prev-image-mobile" type="button" class="flex h-8 w-8 items-center justify-center rounded-full bg-white/80 shadow-base">
+            <svg class="h-5 w-5">
+              <use xlink:href="#chevron-right" />
+            </svg>
+          </button>
+          <button id="next-image-mobile" type="button" class="flex h-8 w-8 items-center justify-center rounded-full bg-white/80 shadow-base">
+            <svg class="h-5 w-5">
+              <use xlink:href="#chevron-left" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="mt-2 flex items-center justify-center gap-x-2">
+        {% for extra_image in extra_images %}
+        <button type="button" class="h-2 w-2 rounded-full bg-primary"></button>
+        {% endfor %}
+      </div>
+    </div>
+    <!-- Info -->
+    <div class="space-y-4">
+      <div>
+        <h1 class="text-xl font-bold">{{ product.name }}</h1>
+        <div class="mt-2 flex items-center gap-x-2">
+          <div class="flex items-center gap-x-1">
+            <svg class="h-5 w-5 text-yellow-400">
+              <use xlink:href="#star" />
+            </svg>
+            <svg class="h-5 w-5 text-yellow-400">
+              <use xlink:href="#star" />
+            </svg>
+            <svg class="h-5 w-5 text-yellow-400">
+              <use xlink:href="#star" />
+            </svg>
+            <svg class="h-5 w-5 text-yellow-400">
+              <use xlink:href="#star" />
+            </svg>
+            <svg class="h-5 w-5 text-yellow-400">
+              <use xlink:href="#star" />
+            </svg>
+          </div>
+          <div class="text-sm text-text/60">({{ comments.count }}  نظر)</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-x-4" id="product-price-container-mobile">
+        <div class="flex items-center gap-x-2">
+          <div id="final-price-mobile" class="text-2xl font-bold text-primary">انتخاب کنید</div>
+          <div id="base-price-container-mobile">
+            <del id="base-price-mobile" class="text-sm text-text/60 decoration-warning hidden"></del>
+          </div>
+          <div id="discount-percent-container-mobile">
+            <div id="discount-percent-mobile" class="flex w-10 items-center justify-center rounded-full bg-warning py-0.5 text-sm font-bold text-white dark:bg-red-600 hidden"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- verified text -->
+    <div class="mb-6 mt-4 flex items-center gap-x-2 rounded-lg bg-primary/10 p-4 text-sm text-primary /5">
+      <svg class="h-6 w-6">
+        <use xlink:href="#verified" />
+      </svg>
+      تضمین سلامت فیزیکی و اصالت کالا
+    </div>
+    <!-- Dynamic Attributes for Mobile (Copied from Desktop) -->
+    <div class="space-y-4">
+        {% for attr_name, values in grouped_attributes.items %}
+        <div class="mb-4">
+            <div class="mb-4 text-sm md:text-base">{{ attr_name }}</div>
+            <fieldset class="mb-4 flex flex-wrap items-center gap-2 attribute-fieldset" data-attribute-name="{{ attr_name }}">
+                {% for val in values %}
+                <div>
+                    <input type="radio"
+                           id="{{ attr_name|slugify }}-{{ val|slugify }}-mobile"
+                           name="{{ attr_name }}"
+                           value="{{ val }}"
+                           class="peer hidden attribute-radio" />
+                    <label for="{{ attr_name|slugify }}-{{ val|slugify }}-mobile"
+                           class="relative block cursor-pointer rounded-full border-2 p-2 shadow-base peer-checked:border-emerald-500 hover:border-border/50 dark:peer-checked:border-emerald-400 dark:hover:border-white/10">
+                        <div class="flex items-center gap-x-2">
+                            <p class="text-sm text-text/90 md:text-base">{{ val }}</p>
+                        </div>
+                    </label>
+                </div>
+                {% endfor %}
+            </fieldset>
+        </div>
+        {% endfor %}
+        <div>
+            <div class="mb-4 text-sm md:text-base">انتخاب تعداد</div>
+            <div class="flex h-12 w-40 items-center justify-between rounded-lg border px-4 py-1">
+                <button type="button" id="decrement-btn-mobile" data-action="decrement">
+                    <svg class="h-7 w-7 text-red-600 dark:text-red-500">
+                        <use xlink:href="#minus" />
+                    </svg>
+                </button>
+                <input id="quantity-input-mobile" value="1" type="number" min="1" class="flex h-6 w-6 w-full select-none items-center justify-center bg-transparent text-center outline-hidden" />
+                <button type="button" id="increment-btn-mobile" data-action="increment">
+                    <svg class="h-7 w-7 text-primary">
+                        <use xlink:href="#plus" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- Add to cart -->
+    <div class="mb-6">
+      <button id="add-to-cart-btn-mobile" class="btn-primary w-full px-4 py-3 bg-gray-400 text-white cursor-not-allowed opacity-50" disabled>افزودن به سبد خرید</button>
+    </div>
+    <!-- verified text -->
+    <div class="mb-6 space-y-4">
+      <div class="flex items-center gap-x-2 rounded-lg border px-4 py-3 text-sm text-text/60">
+        <svg class="h-5 w-5">
+          <use xlink:href="#refund" />
+        </svg>
+        هفت روز ضمانت بازگشت کالا
+      </div>
+      <div class="flex items-center gap-x-2 rounded-lg border px-4 py-3 text-sm text-text/60">
+        <svg class="h-5 w-5">
+          <use xlink:href="#original" />
+        </svg>
+        ضمانت اصالت کالا
+      </div>
+      <div class="flex items-center gap-x-2 rounded-lg border px-4 py-3 text-sm text-text/60">
+        <svg class="h-5 w-5">
+          <use xlink:href="#fast-delivery" />
+        </svg>
+        ارسال سریع
+      </div>
+      <div class="flex items-center gap-x-2 rounded-lg border px-4 py-3 text-sm text-text/60">
+        <svg class="h-5 w-5">
+          <use xlink:href="#support" />
+        </svg>
+        پشتیبانی 24 ساعته
+      </div>
+    </div>
+    <!-- Description -->
+    <div class="mb-6">
+      <div class="relative mb-4 w-fit text-xl font-medium">توضیحات محصول
+        <span class="absolute right-0 top-10 h-[3px] w-full rounded-full bg-primary"></span>
+      </div>
+      <div id="descriptionContainerMobile" class="max-h-[300px] overflow-hidden transition-all duration-300">
+        {{ product.description }}
+      </div>
+      <button id="toggleDescriptionButtonMobile" class="mt-4 flex items-center gap-x-2 text-blue-500 transition-all duration-300">
+        مشاهده بیشتر
+        <svg class="h-5 w-5 transform transition-transform duration-300">
+          <use xlink:href="#chevron-left" />
+        </svg>
+      </button>
+    </div>
+    <!-- Specifications -->
+    <div class="mb-6">
+      <div class="relative mb-4 w-fit text-xl font-medium">مشخصات محصول
+        <span class="absolute right-0 top-10 h-[3px] w-full rounded-full bg-primary"></span>
+      </div>
+      <div class="overflow-hidden rounded-lg border shadow-base">
+        <table class="w-full text-sm">
+          <tbody>
+            {% for product_feature in product_features %}
+            <tr class="border-b">
+              <td class="w-1/3 bg-muted p-4 font-medium">{{ product_feature.feature.name }}</td>
+              <td class="p-4"> {% if product_feature.option %} {{ product_feature.option }}  {% else %} {{ product_feature.value }} {% endif %} </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Comments -->
+    <div class="mb-6">
+      <div class="relative mb-4 w-fit text-xl font-medium">دیدگاه ها
+        <span class="absolute right-0 top-10 h-[3px] w-full rounded-full bg-primary"></span>
+      </div>
+      <!-- Submit New Comment -->
+      <div class="mb-4 rounded-lg border p-4 shadow-base">
+        <h3 class="mb-4 font-medium">دیدگاه خود را بنویسید</h3>
+        <form method="post" action="{% url 'review:product-comment-create' %}">
+            {% csrf_token %}
+            <input type="hidden" name="product" value="{{ product.id }}">
+            <input type="hidden" name="parent" value=""> 
+            <div class="space-y-4">
+                <div>
+                    <label for="title-mobile" class="relative block rounded-lg border shadow-base">
+                        <input type="text" id="title-mobile" name="title" class="peer w-full rounded-lg border-none bg-transparent px-4 py-3 placeholder-transparent focus:outline-hidden focus:ring-0" placeholder="عنوان دیدگاه" />
+                        <span class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-muted px-2 py-0.5 text-sm text-text/90 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-focus:top-0 peer-focus:text-sm">عنوان دیدگاه</span>
+                    </label>
+                </div>
+                <div>
+                    <label for="comment-mobile" class="relative block rounded-lg border shadow-base">
+                        <textarea type="text" id="comment-mobile" name="text" rows="3" class="peer w-full rounded-lg border-none bg-transparent px-4 py-3 placeholder-transparent focus:outline-hidden focus:ring-0" placeholder="متن دیدگاه"></textarea>
+                        <span class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-muted px-2 py-0.5 text-sm text-text/90 transition-all peer-placeholder-shown:top-6 peer-placeholder-shown:text-base peer-focus:top-0 peer-focus:text-sm">متن دیدگاه</span>
+                    </label>
+                </div>
+                <div class="flex items-center gap-x-4">
+                    <div class="text-sm text-text/60">این محصول را به دیگران پیشنهاد</div>
+                    <fieldset class="flex items-center gap-4">
+                        <legend class="sr-only">Suggestion</legend>
+                        <div class="flex items-center gap-x-2">
+                            <input checked type="radio" id="suggestion-yes-mobile" name="is_recommended" value="True" class="peer hidden" />
+                            <label for="suggestion-yes-mobile" class="cursor-pointer rounded-lg border px-4 py-2 text-sm peer-checked:border-emerald-500 peer-checked:text-emerald-500">بله</label>
+                        </div>
+                        <div class="flex items-center gap-x-2">
+                            <input type="radio" id="suggestion-no-mobile" name="is_recommended" value="False" class="peer hidden" />
+                            <label for="suggestion-no-mobile" class="cursor-pointer rounded-lg border px-4 py-2 text-sm peer-checked:border-emerald-500 peer-checked:text-emerald-500">خیر</label>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="flex justify-end">
+                    <button type="submit" class="btn-primary w-full px-4 py-2 md:w-auto bg-emerald-500 hover:bg-emerald-600 text-white">ارسال دیدگاه</button>
+                </div>
+            </div>
+        </form>
+      </div>
+      <!-- Comments List -->
+      <div id="commentsContainerMobile" class="max-h-[300px] overflow-hidden transition-all duration-300">
+        <ul class="space-y-4 divide-y divide-gray-200 dark:divide-white/10">
+          {% for comment in comments %}
+          <li class="space-y-2">
+            <div class="py-6">
+              <div class="flex items-center justify-between gap-2">
+                <h5 class="mb-4 leading-relaxed xl:text-lg">{{ comment.title }}</h5>
+                <button type="button" class="btn-secondary-nobg reply-btn text-blue-500" data-comment-id="{{ comment.id }}">
+                  پاسخ
+                  <svg class="w-5 h-5">
+                    <use xlink:href="#chevron-left" />
+                  </svg>
+                </button>
+              </div>
+              <div class="mb-6 flex items-center gap-x-4 border-b pb-6">
+                {% if comment.is_recommended %}
+                <div class="flex items-center gap-x-2 text-primary">
+                  <svg class="h-5 w-5">
+                    <use xlink:href="#like" />
+                  </svg>
+                  پیشنهاد میکنم
+                </div>
+                {% else %}
+                <div class="flex items-center gap-x-2 text-red-500 dark:text-red-400">
+                  <svg class="h-5 w-5">
+                    <use xlink:href="#dislike" />
+                  </svg>
+                  پیشنهاد نمیکنم
+                </div>
+                {% endif %}
+                <div class="flex items-center gap-x-2">
+                  <div class="text-sm text-text/60">{{ comment.created_date|jalali_date }}</div>
+                  <span class="h-3 w-px rounded-full bg-background dark:bg-muted/10"></span>
+                  <div class="text-sm text-text/60"> {{ comment.user.get_status.label }} </div>
+                </div>
+              </div>
+              <div class="mb-6 border-b pb-6">
+                <p class="line-clamp-4 text-sm text-text/90">
+                  {{ comment.text }}
+                </p>
+              </div>
+              <div class="flex items-center justify-end gap-x-8">
+                <div class="text-sm text-text/60">آیا این دیدگاه برایتان مفید بود؟</div>
+              
+                <button 
+                    class="like-btn flex items-center gap-x-2 text-gray-500 transition-all duration-200 hover:text-emerald-400" 
+                    data-comment-id="{{ comment.id }}">
+                  <span class="like-count text-sm">{{ comment.likes }}</span>
+                  <svg class="h-6 w-6"><use xlink:href="#like" /></svg>
+                </button>
+              
+                <button 
+                    class="dislike-btn flex items-center gap-x-2 text-gray-500 transition-all duration-200 hover:text-red-400" 
+                    data-comment-id="{{ comment.id }}">
+                  <span class="dislike-count text-sm">{{ comment.dislikes }}</span>
+                  <svg class="h-6 w-6"><use xlink:href="#dislike" /></svg>
+                </button>
+              </div>
+              
+            </div>
+            {% if comment.prefetched_replies %}
+            <ul class="space-y-4 pl-8 mt-4 border-l-2 border-gray-200 dark:border-white/10 hidden">
+              {% for reply in comment.prefetched_replies %}
+                <li class="space-y-2">
+                    <div class="py-4">
+                        <div class="flex items-center justify-between gap-2">
+                            <h5 class="mb-2 leading-relaxed xl:text-lg text-gray-700 dark:text-text-300">{{ reply.title }}</h5>
+                            <button type="button" class="btn-secondary-nobg reply-to-reply-btn text-blue-500" data-comment-id="{{ reply.id }}">
+                              پاسخ
+                              <svg class="w-5 h-5">
+                                <use xlink:href="#chevron-left" />
+                              </svg>
+                            </button>
+                        </div>
+                        <div class="mb-4 flex items-center gap-x-4 border-b pb-4">
+                            <div class="flex items-center gap-x-2 text-sm text-text/60">
+                                <span>{{ reply.created_date|jalali_date }}</span>
+                                <span class="h-3 w-px rounded-full bg-background dark:bg-muted/10"></span>
+                                <div class="text-sm text-text/60">{{ reply.user.get_status.label }}</div>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <p class="text-sm text-text/90">
+                                {{ reply.text }}
+                            </p>
+                        </div>
+                        <div class="flex items-center justify-end gap-x-8">
+                          <div class="text-sm text-text/60">آیا این پاسخ برایتان مفید بود؟</div>
+                        
+                          <button 
+                              class="like-btn flex items-center gap-x-2 text-gray-500 transition-all duration-200 hover:text-emerald-400" 
+                              data-comment-id="{{ reply.id }}">
+                            <span class="like-count text-sm">{{ reply.likes }}</span>
+                            <svg class="h-6 w-6"><use xlink:href="#like" /></svg>
+                          </button>
+                        
+                          <button 
+                              class="dislike-btn flex items-center gap-x-2 text-gray-500 transition-all duration-200 hover:text-red-400" 
+                              data-comment-id="{{ reply.id }}">
+                            <span class="dislike-count text-sm">{{ reply.dislikes }}</span>
+                            <svg class="h-6 w-6"><use xlink:href="#dislike" /></svg>
+                          </button>
+                        </div>
+                        
+                        
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="mt-4 flex justify-center">
+        <button id="toggleCommentsButtonMobile" class="btn-secondary-nobg text-blue-500">
+          مشاهده بیشتر
+          <svg class="h-5 w-5 transform transition-transform duration-300">
+            <use xlink:href="#chevron-left" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Comment Reply Modal -->
+<div id="comment-reply-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+  <div class="flex items-center justify-center min-h-full p-4">
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-background/70 transition-opacity dark:bg-background/80" aria-hidden="true"></div>
+    <!-- Modal Content -->
+    <div class="relative bg-background text-text rounded-lg shadow-xl 
+                max-w-2xl w-full max-h-[90vh] overflow-hidden">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between p-4 border-b border-border">
+        <h3 class="text-xl font-semibold text-text">پاسخ به دیدگاه</h3>
+        <button type="button" 
+                class="text-text/60 hover:bg-muted hover:text-text rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
+                data-modal-hide="comment-reply-modal">
+          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+          </svg>
+          <span class="sr-only">بستن</span>
+        </button>
+      </div>
+      <!-- Modal Body -->
+      <div class="p-6 space-y-4 overflow-y-auto max-h-[60vh]">
+        <!-- Comment Details -->
+        <div id="comment-details" 
+             class="p-4 rounded-lg bg-muted text-text">
+          <!-- Content will be loaded by JavaScript -->
+        </div>
+        <!-- Other Replies -->
+        <div id="other-replies" class="space-y-4 mt-6">
+          <h4 class="text-lg font-medium text-text">پاسخ‌های دیگر</h4>
+          <div class="space-y-4">
+            <div id="existing-replies">
+            </div>
+          </div>
+        </div>
+        <!-- Reply Form -->
+        <form method="post" action="{% url 'review:product-comment-create' %}" class="mt-6">
+          {% csrf_token %}
+          <input type="hidden" name="product" value="{{ product.id }}"> 
+          <input type="hidden" name="parent" id="parent-comment-id" value=""> 
+          <div class="mb-4">
+            <label for="reply-title" class="block mb-2 text-sm font-medium text-text">عنوان پاسخ</label>
+            <input type="text" id="reply-title" name="title"
+                   class="block w-full rounded-lg border border-border shadow-base 
+                          bg-background text-text placeholder-text/60 
+                          focus:ring-0 focus:border-primary focus:outline-hidden"
+                   placeholder="عنوان پاسخ خود را وارد کنید" required>
+          </div>
+          <div class="mb-4">
+            <label for="reply-text" class="block mb-2 text-sm font-medium text-text">متن پاسخ</label>
+            <textarea id="reply-text" name="text" rows="4"
+                      class="block w-full rounded-lg border border-border shadow-base 
+                             bg-background text-text placeholder-text/60 
+                             focus:ring-0 focus:border-primary focus:outline-hidden"
+                      placeholder="متن پاسخ خود را وارد کنید" required></textarea>
+          </div>
+          <div class="flex items-center gap-x-4 mb-4">
+            <div class="text-sm text-text/60">این پاسخ را پیشنهاد میکنم:</div>
+            <fieldset class="flex items-center gap-4">
+              <legend class="sr-only">Suggestion</legend>
+              <div class="flex items-center gap-x-2">
+                <input checked type="radio" id="reply-suggestion-yes" name="is_recommended" value="True" class="peer hidden" />
+                <label for="reply-suggestion-yes" class="cursor-pointer rounded-lg border px-4 py-2 text-sm peer-checked:border-emerald-500 peer-checked:text-emerald-500">بله</label>
+              </div>
+              <div class="flex items-center gap-x-2">
+                <input type="radio" id="reply-suggestion-no" name="is_recommended" value="False" class="peer hidden" />
+                <label for="reply-suggestion-no" class="cursor-pointer rounded-lg border px-4 py-2 text-sm peer-checked:border-emerald-500 peer-checked:text-emerald-500">خیر</label>
+              </div>
+            </fieldset>
+          </div>
+          <div class="flex justify-end">
+            <button type="submit"
+                    class="text-white bg-emerald-500 hover:bg-emerald-600 
+                           focus:ring-4 focus:outline-none focus:ring-emerald-300 
+                           font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+              ارسال پاسخ
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+{% block extra_js %}
+<script>
+  $(document).ready(function(){
+    function sendVote(commentId, action, btn){
+      $.ajax({
+        url: "{% url 'review:like-or-dislike-product-comment' %}",  
+        type: "POST",
+        data: {
+          comment_id: commentId,
+          action: action,
+          csrfmiddlewaretoken: "{{ csrf_token }}"
+        },
+        success: function(response){
+          if(response.status === "success"){
+            const allLikeBtns = $(`.like-btn[data-comment-id="${commentId}"]`);
+            const allDislikeBtns = $(`.dislike-btn[data-comment-id="${commentId}"]`);
+
+            allLikeBtns.find('.like-count').text(response.likes);
+            allDislikeBtns.find('.dislike-count').text(response.dislikes);
+
+            if(action === "like"){
+              allLikeBtns.addClass("text-emerald-500").prop("disabled", true);
+              allDislikeBtns.removeClass("text-red-500").prop("disabled", false);
+            } else { 
+              allDislikeBtns.addClass("text-red-500").prop("disabled", true);
+              allLikeBtns.removeClass("text-emerald-500").prop("disabled", false);
+            }
+
+            if (!window.userVotes) window.userVotes = {};
+            window.userVotes[commentId] = action;
+            localStorage.setItem('userCommentVotes', JSON.stringify(window.userVotes));
+          }else{
+            alert(response.message);
+          }
+        },
+        error: function(){
+            console.error("Error sending vote");
+            alert("خطا در ارسال رأی. لطفاً دوباره تلاش کنید.");
+        }
+      });
+    }
+
+    $(document).on('click', '.like-btn', function(){
+      let commentId = $(this).data("comment-id");
+      sendVote(commentId, "like", $(this));
+    });
+    $(document).on('click', '.dislike-btn', function(){
+      let commentId = $(this).data("comment-id");
+      sendVote(commentId, "dislike", $(this));
+    });
+  });
+
+  function updateVoteButtonState(commentId, action) {
+      const allLikeBtns = $(`.like-btn[data-comment-id="${commentId}"]`);
+      const allDislikeBtns = $(`.dislike-btn[data-comment-id="${commentId}"]`);
+
+      allLikeBtns.removeClass("text-emerald-500").prop("disabled", false);
+      allDislikeBtns.removeClass("text-red-500").prop("disabled", false);
+
+      if (action === "like") {
+          allLikeBtns.addClass("text-emerald-500").prop("disabled", true);
+          allDislikeBtns.removeClass("text-red-500").prop("disabled", false);
+      } else if (action === "dislike") {
+          allDislikeBtns.addClass("text-red-500").prop("disabled", true);
+          allLikeBtns.removeClass("text-emerald-500").prop("disabled", false);
+      }
+  }
+
+  window.userVotes = JSON.parse(localStorage.getItem('userCommentVotes')) || {};
+
+  function addToWishlist(element,product_id) {
+    $.ajax({
+        url: "{%  url 'wishlist:add-or-remove-wishlist-product' %}",
+        method: 'POST',
+        data: {
+            product_id: product_id,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        success: function (response) {
+            Toastify({
+                text:response.message,
+                className: `info`,
+                style: {
+                  background: "blue",
+                }
+              }).showToast();
+            $(element).toggleClass('active');
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown);
+        }
+    });
+}
+  document.addEventListener('DOMContentLoaded', function() {
+    Object.entries(window.userVotes).forEach(([commentId, action]) => {
+        updateVoteButtonState(commentId, action);
+    });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    function showToast(message, isSuccess = true) {
+        Toastify({
+            text: message,
+            duration: 3000,
+            newWindow: true,
+            close: true,
+            gravity: "top",
+            position: "left",
+            stopOnFocus: true,
+            style: {
+                background: isSuccess ? "linear-gradient(to right, #00b09b, #96c93d)" : "linear-gradient(to right, #ff416c, #ff4b2b)",
+            },
+            onClick: function(){}
+        }).showToast();
+    }
+        function updateMiniCartUI(data) {
+          $('#mini-cart-count').text(data.total_quantity);
+          $('#mini-cart-items-count').text(data.total_quantity + ' مورد');
+          $('#mini-cart-final-amount').text(new Intl.NumberFormat('fa-IR').format(data.total_payment_amount));
+          const $fullCart = $('#dropdownBasketDesktop');
+          const $emptyCart = $('#dropdownBasketDesktopEmpty');
+          const $container = $('#mini-cart-items-container');
+          if (Object.keys(data.cart_items).length === 0) {
+               $container.empty();
+               $container.append('<li class="py-4 text-center text-text/60">سبد خرید شما خالی است.</li>');
+               $fullCart.addClass('hidden');
+               $emptyCart.removeClass('hidden');
+               return;
+          } else {
+               $emptyCart.addClass('hidden');
+               $fullCart.removeClass('hidden');
+          }
+          $container.empty();
+          for (const key of Object.keys(data.cart_items)) {
+            const itemData = data.cart_items[key];
+            const variantId = key.replace("v", "");
+              const itemHtml = `
+              <li class="cart-item" data-variant-id="${itemData.variant_info.id}">
+                  <div class="flex gap-x-2 py-5">
+                    <div class="relative min-w-fit">
+                      <a href="./product-detail.html">
+                        <img
+                          alt="${itemData.variant_info.product_name}"
+                          class="h-[120px] w-[120px]"
+                          loading="lazy"
+                          src="${itemData.variant_info.product_image_url || '/static/path/to/default/image.jpg'}"
+                        />
+                      </a>
+                      <button
+                        class="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-background remove-product-btn"
+                        type="button"
+                        title="حذف"
+                      >
+                        <svg class="h-6 w-6 text-red-600 dark:text-red-500">
+                          <use xlink:href="#close"></use>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="w-full space-y-1.5">
+                      <a
+                        class="line-clamp-2 h-12"
+                        href="./product-detail.html"
+                      >
+                        ${itemData.variant_info.product_name}
+                      </a>
+                      <div
+                        class="flex items-center gap-x-2 text-sm text-text/60"
+                      >
+                        <div
+                          class="h-3 w-px rounded-full bg-background"
+                        ></div>
+                        <div class="flex items-center gap-x-2">
+                          <span> ${itemData.variant_info.attribute_value}</span>
+                        </div>
+                      </div>
+                      <div
+                        class="flex items-center justify-between gap-x-2"
+                      >
+                        <div class="text-primary">
+                          <span class="text-lg font-bold item-total-price"
+                            >${new Intl.NumberFormat('fa-IR').format(itemData.total_price_with_discount)} </span
+                          >
+                          <span class="text-sm">تومان</span>
+                        </div>
+                        <div
+                          class="flex h-10 w-24 items-center justify-between rounded-lg border px-2 py-1 quantity-container"
+                          data-max-stock="${itemData.variant_info.stock}"
+                        >
+                          <button
+                            type="button"
+                            class="increment-btn ${itemData.quantity >= itemData.variant_info.stock ? 'btn-increment-disabled' : ''}"
+                            ${itemData.quantity >= itemData.variant_info.stock ? 'disabled' : ''}
+                            data-action="increment"
+                            title="افزایش"
+                          >
+                            <svg class="h-5 w-5 text-primary">
+                              <use xlink:href="#plus" />
+                            </svg>
+                          </button>
+                          <input
+                            value="${itemData.quantity}"
+                            disabled
+                            type="number"
+                            class="quantity-input flex h-5 w-full grow select-none items-center justify-center bg-transparent text-center text-sm outline-hidden"
+                          />
+                          <button
+                            type="button"
+                            class="decrement-btn"
+                            ${itemData.quantity <= 1 ? 'disabled' : ''}
+                            data-action="decrement"
+                            title="کاهش"
+                          >
+                            <svg
+                              class="h-5 w-5 text-red-600 dark:text-red-500 ${itemData.quantity <= 1 ? 'opacity-50' : ''}"
+                            >
+                              <use xlink:href="#minus" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              `;
+              $container.append(itemHtml);
+          }
+      }
+    let MAX_QUANTITY = 1;
+    let selectedVariantData = null;
+    const addToCartBtn = document.getElementById('add-to-cart-btn');
+    const addToCartBtnMobile = document.getElementById('add-to-cart-btn-mobile');
+    function updateAddToCartButtonState() {
+        const isAnyAttributeSelected = document.querySelectorAll('.attribute-fieldset input[type="radio"]:checked').length > 0;
+        const buttons = [addToCartBtn, addToCartBtnMobile];
+        buttons.forEach(btn => {
+            if (isAnyAttributeSelected) {
+                btn.disabled = false;
+                btn.classList.remove('bg-gray-400', 'text-white', 'cursor-not-allowed', 'opacity-50');
+                btn.classList.add('bg-emerald-500', 'hover:bg-emerald-600', 'text-white', 'cursor-pointer');
+            } else {
+                btn.disabled = true;
+                btn.classList.remove('bg-emerald-500', 'hover:bg-emerald-600', 'text-white', 'cursor-pointer');
+                btn.classList.add('bg-gray-400', 'text-white', 'cursor-not-allowed', 'opacity-50');
+            }
+        });
+    }
+    [addToCartBtn, addToCartBtnMobile].forEach(btn => {
+        if (btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (selectedVariantData && selectedVariantData.success) {
+                    const quantityInputDesktop = document.getElementById('quantity-input');
+                    const quantityInputMobile = document.getElementById('quantity-input-mobile');
+                    const quantity = parseInt(quantityInputDesktop?.value || quantityInputMobile?.value || 1);
+                    if (isNaN(quantity) || quantity <= 0) {
+                         Toastify({
+                            text: 'تعداد نامعتبر است.',
+                            className: "error",
+                            style: {
+                                background: "red",
+                            }
+                        }).showToast();
+                        return;
+                    }
+                    const maxQty = selectedVariantData.stock || MAX_QUANTITY || 1;
+                    if (quantity > maxQty) {
+                         Toastify({
+                            text: 'تعداد انتخابی بیشتر از موجودی است.',
+                            className: "error",
+                            style: {
+                                background: "red",
+                            }
+                        }).showToast();
+                        return;
+                    }
+                    const productId = {{ product.id }};
+                    const variantId = selectedVariantData.variant_id;
+                    $.ajax({
+                        url: "{% url 'cart:add-product' %}",
+                        method: 'POST',
+                        headers: {
+                            "X-CSRFToken": getCookie('csrftoken')
+                        },
+                        data: {
+                            product_id: productId,
+                            variant_id: variantId,
+                            quantity: quantity,
+                        },
+                        success: function (response) {
+                            if (response.status === 'success') {
+                                showToast(response.message, true);
+                                updateMiniCartUI(response);
+                            } else {
+                                showToast(response.message, false);
+                            }
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            console.error('Error adding to cart:', errorThrown);
+                            console.error('Response Text:', jqXHR.responseText);
+                            showToast('خطایی در اتصال به سرور رخ داد.', false);
+                        }
+                    });
+                } else {
+                     Toastify({
+                        text: 'لطفاً گزینه‌های محصول را انتخاب کنید.',
+                        className: "error",
+                        style: {
+                            background: "red",
+                        }
+                    }).showToast();
+                }
+            });
+        }
+    });
+    function updateProductPrice(data) {
+        selectedVariantData = data;
+        const finalPriceEl = document.getElementById('final-price');
+        const basePriceEl = document.getElementById('base-price');
+        const discountPercentEl = document.getElementById('discount-percent');
+        const basePriceContainer = document.getElementById('base-price-container');
+        const discountPercentContainer = document.getElementById('discount-percent-container');
+        const finalPriceMobileEl = document.getElementById('final-price-mobile');
+        const basePriceMobileEl = document.getElementById('base-price-mobile');
+        const discountPercentMobileEl = document.getElementById('discount-percent-mobile');
+        const basePriceContainerMobile = document.getElementById('base-price-container-mobile');
+        const discountPercentContainerMobile = document.getElementById('discount-percent-container-mobile');
+        if (data.success) {
+            const formattedFinalPrice = new Intl.NumberFormat('fa-IR').format(Math.round(data.final_price)) + ' تومان';
+            const formattedBasePrice = new Intl.NumberFormat('fa-IR').format(Math.round(data.base_price)) + ' تومان';
+            if (finalPriceEl) finalPriceEl.textContent = formattedFinalPrice;
+            if (finalPriceMobileEl) finalPriceMobileEl.textContent = formattedFinalPrice;
+            if (data.has_discount) {
+                 if (basePriceEl) {
+                    basePriceEl.textContent = formattedBasePrice;
+                    basePriceEl.classList.remove('hidden');
+                    basePriceContainer.classList.remove('hidden');
+                }
+                if (basePriceMobileEl) {
+                    basePriceMobileEl.textContent = formattedBasePrice;
+                    basePriceMobileEl.classList.remove('hidden');
+                    basePriceContainerMobile.classList.remove('hidden');
+                }
+                if (discountPercentEl) {
+                    discountPercentEl.textContent = data.discount_percent + '%';
+                    discountPercentEl.classList.remove('hidden');
+                    discountPercentContainer.classList.remove('hidden');
+                }
+                if (discountPercentMobileEl) {
+                     discountPercentMobileEl.textContent = data.discount_percent + '%';
+                     discountPercentMobileEl.classList.remove('hidden');
+                     discountPercentContainerMobile.classList.remove('hidden');
+                }
+            } else {
+                 if (basePriceEl) {
+                    basePriceEl.classList.add('hidden');
+                    basePriceContainer.classList.add('hidden');
+                }
+                 if (basePriceMobileEl) {
+                    basePriceMobileEl.classList.add('hidden');
+                    basePriceContainerMobile.classList.add('hidden');
+                }
+                 if (discountPercentEl) {
+                    discountPercentEl.classList.add('hidden');
+                    discountPercentContainer.classList.add('hidden');
+                }
+                 if (discountPercentMobileEl) {
+                    discountPercentMobileEl.classList.add('hidden');
+                    discountPercentContainerMobile.classList.add('hidden');
+                }
+            }
+            MAX_QUANTITY = data.stock || 1;
+            const quantityInput = document.getElementById('quantity-input');
+            const quantityInputMobile = document.getElementById('quantity-input-mobile');
+            if (quantityInput) {
+                quantityInput.max = MAX_QUANTITY;
+                quantityInput.min = 1;
+                if (parseInt(quantityInput.value) > MAX_QUANTITY) {
+                    quantityInput.value = MAX_QUANTITY;
+                }
+                if (parseInt(quantityInput.value) < 1) {
+                    quantityInput.value = 1;
+                }
+            }
+            if (quantityInputMobile) {
+                quantityInputMobile.max = MAX_QUANTITY;
+                quantityInputMobile.min = 1;
+                if (parseInt(quantityInputMobile.value) > MAX_QUANTITY) {
+                    quantityInputMobile.value = MAX_QUANTITY;
+                }
+                if (parseInt(quantityInputMobile.value) < 1) {
+                    quantityInputMobile.value = 1;
+                }
+            }
+        } else {
+            console.log("No variant found or error:", data.message);
+             if (finalPriceEl) finalPriceEl.textContent = 'انتخاب کنید';
+             if (finalPriceMobileEl) finalPriceMobileEl.textContent = 'انتخاب کنید';
+             if (basePriceEl) {
+                basePriceEl.classList.add('hidden');
+                basePriceContainer.classList.add('hidden');
+            }
+             if (basePriceMobileEl) {
+                basePriceMobileEl.classList.add('hidden');
+                basePriceContainerMobile.classList.add('hidden');
+            }
+             if (discountPercentEl) {
+                discountPercentEl.classList.add('hidden');
+                discountPercentContainer.classList.add('hidden');
+            }
+             if (discountPercentMobileEl) {
+                discountPercentMobileEl.classList.add('hidden');
+                discountPercentContainerMobile.classList.add('hidden');
+            }
+             MAX_QUANTITY = 1;
+             const quantityInput = document.getElementById('quantity-input');
+             const quantityInputMobile = document.getElementById('quantity-input-mobile');
+             if (quantityInput) {
+                quantityInput.max = MAX_QUANTITY;
+                quantityInput.value = 1;
+             }
+             if (quantityInputMobile) {
+                quantityInputMobile.max = MAX_QUANTITY;
+                quantityInputMobile.value = 1;
+             }
+        }
+        updateAddToCartButtonState();
+    }
+    const attributeInputs = document.querySelectorAll('.attribute-radio');
+    function getSelectedAttributes() {
+         const selectedAttributes = {};
+         const fieldsets = document.querySelectorAll('.attribute-fieldset');
+         fieldsets.forEach(fieldset => {
+             const attrName = fieldset.getAttribute('data-attribute-name');
+             const checkedRadio = fieldset.querySelector('input[type="radio"]:checked');
+             if (checkedRadio) {
+                 selectedAttributes[attrName] = checkedRadio.value;
+             }
+         });
+         return selectedAttributes;
+     }
+    function fetchVariantData() {
+         const selectedAttributes = getSelectedAttributes();
+         const totalAttributes = document.querySelectorAll('.attribute-fieldset').length / 2;
+         const selectedCount = Object.keys(selectedAttributes).length;
+         if (selectedCount === 0) {
+             updateProductPrice({success: false, message: 'No attributes selected'});
+             return;
+         }
+         if (selectedCount < totalAttributes) {
+             return;
+         }
+         const urlParams = new URLSearchParams(selectedAttributes).toString();
+         const apiUrl = `{% url 'shop:product-variant' product.id %}?${urlParams}`;
+         fetch(apiUrl, {
+             method: 'GET',
+             headers: {
+                 'X-Requested-With': 'XMLHttpRequest',
+             },
+         })
+         .then(response => {
+             if (!response.ok) {
+                 throw new Error('Network response was not ok');
+             }
+             return response.json();
+         })
+         .then(data => {
+             updateProductPrice(data);
+         })
+         .catch(error => {
+             console.error('There was a problem with the fetch operation:', error);
+             updateProductPrice({success: false, message: 'Error loading price'});
+         });
+     }
+    attributeInputs.forEach(input => {
+        input.addEventListener('change', fetchVariantData);
+    });
+    function toggleContent(containerId, buttonId) {
+      const container = document.getElementById(containerId);
+      const button = document.getElementById(buttonId);
+      if (!container || !button) return;
+      const isExpanded = container.classList.contains('max-h-[500px]') || container.classList.contains('max-h-[300px]') || (container.style.maxHeight && container.style.maxHeight !== '300px' && container.style.maxHeight !== '500px');
+      if (isExpanded) {
+        if (containerId.includes('Mobile')) {
+          container.style.maxHeight = '300px';
+        } else {
+          container.style.maxHeight = '500px';
+        }
+        container.classList.remove('max-h-[500px]', 'max-h-[300px]');
+        button.querySelector('svg').classList.remove('rotate-90');
+        if (buttonId.includes('Description')) {
+          button.innerHTML = button.innerHTML.replace('مشاهده کمتر', 'مشاهده بیشتر');
+        } else {
+          button.innerHTML = button.innerHTML.replace('مشاهده کمتر', 'مشاهده بیشتر');
+        }
+      } else {
+        container.style.maxHeight = container.scrollHeight + 'px';
+        button.querySelector('svg').classList.add('rotate-90');
+        if (buttonId.includes('Description')) {
+          button.innerHTML = button.innerHTML.replace('مشاهده بیشتر', 'مشاهده کمتر');
+        } else {
+          button.innerHTML = button.innerHTML.replace('مشاهده بیشتر', 'مشاهده کمتر');
+        }
+      }
+    }
+    const setupToggleButton = (containerId, buttonId) => {
+      const button = document.getElementById(buttonId);
+      if (button) {
+        button.addEventListener('click', () => toggleContent(containerId, buttonId));
+      }
+    };
+    setupToggleButton('descriptionContainer', 'toggleDescriptionButton');
+    setupToggleButton('commentsContainer', 'toggleCommentsButton');
+    setupToggleButton('descriptionContainerMobile', 'toggleDescriptionButtonMobile');
+    setupToggleButton('commentsContainerMobile', 'toggleCommentsButtonMobile');
+    function setupImageGallery(mainImageId, prevButtonId, nextButtonId, thumbnails) {
+      const mainImage = document.getElementById(mainImageId);
+      const prevButton = document.getElementById(prevButtonId);
+      const nextButton = document.getElementById(nextButtonId);
+      const thumbnailElements = document.querySelectorAll(thumbnails);
+      if (!mainImage || !prevButton || !nextButton || thumbnailElements.length === 0) return;
+      let currentIndex = 0;
+      thumbnailElements.forEach((thumb, index) => {
+        thumb.addEventListener('click', () => {
+          currentIndex = index;
+          updateMainImage();
+        });
+      });
+      prevButton.addEventListener('click', () => {
+        currentIndex = (currentIndex - 1 + thumbnailElements.length) % thumbnailElements.length;
+        updateMainImage();
+      });
+      nextButton.addEventListener('click', () => {
+        currentIndex = (currentIndex + 1) % thumbnailElements.length;
+        updateMainImage();
+      });
+      function updateMainImage() {
+        mainImage.style.opacity = '0';
+        setTimeout(() => {
+          const newSrc = thumbnailElements[currentIndex].querySelector('img').src;
+          mainImage.src = newSrc;
+          setTimeout(() => {
+            mainImage.style.opacity = '1';
+          }, 50);
+        }, 300);
+      }
+    }
+    setupImageGallery('main-product-image', 'prev-image-desktop', 'next-image-desktop', '.thumbnail-btn');
+    setupImageGallery('mobile-main-image', 'prev-image-mobile', 'next-image-mobile', '.thumbnail-btn');
+    function setupActionButton(buttonId, iconSelector, activeClass, colorClass) {
+      const button = document.getElementById(buttonId);
+      if (!button) return;
+      button.addEventListener('click', function() {
+        const icon = this.querySelector(iconSelector);
+        const isActive = this.classList.contains(activeClass);
+        if (isActive) {
+          this.classList.remove(activeClass);
+          this.classList.add('animate-pulse');
+          setTimeout(() => this.classList.remove('animate-pulse'), 500);
+        } else {
+          this.classList.add(activeClass);
+          this.classList.add('animate-bounce');
+          setTimeout(() => this.classList.remove('animate-bounce'), 500);
+        }
+      });
+    }
+    setupActionButton('add-to-favorite-desktop', 'svg', 'text-red-500', 'bg-red-50');
+    setupActionButton('add-to-compare-desktop', 'svg', 'text-blue-500', 'bg-blue-50');
+    setupActionButton('add-to-favorite-mobile', 'svg', 'text-red-500', 'bg-red-50');
+    setupActionButton('add-to-compare-mobile', 'svg', 'text-blue-500', 'bg-blue-50');
+    function changeQuantity(inputElement, change) {
+        let currentValue = parseInt(inputElement.value) || 1;
+        let newValue = currentValue + change;
+        const maxQty = selectedVariantData && selectedVariantData.stock ? selectedVariantData.stock : MAX_QUANTITY;
+        if (newValue >= 1 && newValue <= maxQty) {
+            inputElement.value = newValue;
+        } else if (newValue > maxQty) {
+            inputElement.value = maxQty;
+        } else if (newValue < 1) {
+            inputElement.value = 1;
+        }
+    }
+    document.getElementById('increment-btn')?.addEventListener('click', function() {
+        const input = document.getElementById('quantity-input');
+        if (input) changeQuantity(input, 1);
+    });
+    document.getElementById('decrement-btn')?.addEventListener('click', function() {
+        const input = document.getElementById('quantity-input');
+        if (input) changeQuantity(input, -1);
+    });
+    document.getElementById('increment-btn-mobile')?.addEventListener('click', function() {
+        const input = document.getElementById('quantity-input-mobile');
+        if (input) changeQuantity(input, 1);
+    });
+    document.getElementById('decrement-btn-mobile')?.addEventListener('click', function() {
+        const input = document.getElementById('quantity-input-mobile');
+        if (input) changeQuantity(input, -1);
+    });
+    document.querySelectorAll('.reply-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        const commentId = this.getAttribute('data-comment-id');
+        document.getElementById('parent-comment-id').value = commentId;
+        const commentElement = this.closest('li');
+        const commentTitle = commentElement.querySelector('h5').textContent;
+        const commentText = commentElement.querySelector('.line-clamp-4').textContent;
+        const commentDate = commentElement.querySelector('.border-b.pb-6 div.text-sm').textContent;
+        const commentDetails = document.getElementById('comment-details');
+        commentDetails.innerHTML = `
+          <div class="flex items-start justify-between">
+            <div>
+              <h4 class="font-medium text-gray-900 dark:text-text">${commentTitle}</h4>
+              <p class="text-sm text-gray-600 dark:text-text">${commentText}</p>
+            </div>
+            <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+              <span>${commentDate}</span>
+            </div>
+          </div>
+        `;
+        const repliesContainer = document.getElementById('existing-replies');
+        repliesContainer.innerHTML = ''; 
+        const commentRepliesSection = commentElement.querySelector('ul.space-y-4.pl-8.mt-4'); 
+        if (commentRepliesSection) {
+            repliesContainer.innerHTML = commentRepliesSection.innerHTML;
+            repliesContainer.querySelectorAll('.reply-to-reply-btn').forEach(btn => {
+                btn.remove(); 
+            });
+
+            repliesContainer.querySelectorAll('.like-btn, .dislike-btn').forEach(btn => {
+                const btnCommentId = btn.getAttribute('data-comment-id');
+                if (btnCommentId && window.userVotes[btnCommentId]) {
+                    updateVoteButtonState(btnCommentId, window.userVotes[btnCommentId]);
+                }
+            });
+        } else {
+            repliesContainer.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">هیچ پاسخی وجود ندارد.</p>';
+        }
+        document.getElementById('comment-reply-modal').classList.remove('hidden');
+      });
+    });
+    document.querySelectorAll('.reply-to-reply-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        const replyId = this.getAttribute('data-comment-id');
+        document.getElementById('parent-comment-id').value = replyId;
+        const replyElement = this.closest('li');
+        const replyTitle = replyElement.querySelector('h5').textContent;
+        const replyText = replyElement.querySelector('div.mb-4 p').textContent;
+        const replyDate = replyElement.querySelector('.border-b.pb-4 div.text-sm').textContent;
+        const commentDetails = document.getElementById('comment-details');
+        commentDetails.innerHTML = `
+          <div class="flex items-start justify-between">
+            <div>
+              <h4 class="font-medium text-gray-900 dark:text-text">${replyTitle}</h4>
+              <p class="text-sm text-gray-600 dark:text-text">${replyText}</p>
+            </div>
+            <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+              <span>${replyDate}</span>
+            </div>
+          </div>
+        `;
+
+        const repliesContainer = document.getElementById('existing-replies');
+        repliesContainer.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400">شما در حال پاسخ به یک پاسخ هستید. پاسخ‌های قبلی در این سطح نمایش داده نمی‌شوند.</p>';
+
+        if (window.userVotes[replyId]) {
+            updateVoteButtonState(replyId, window.userVotes[replyId]);
+        }
+
+        document.getElementById('comment-reply-modal').classList.remove('hidden');
+      });
+    });
+    document.querySelectorAll('[data-modal-hide="comment-reply-modal"], .bg-black').forEach(element => {
+      element.addEventListener('click', function() {
+        document.getElementById('comment-reply-modal').classList.add('hidden');
+        document.getElementById('parent-comment-id').value = '';
+        document.getElementById('comment-details').innerHTML = '';
+        document.getElementById('existing-replies').innerHTML = '';
+      });
+    });
+    document.querySelectorAll('input[name="is_recommended"]').forEach(radio => {
+      radio.addEventListener('change', function() {
+        console.log('Radio changed to:', this.value);
+      });
+    });
+    updateAddToCartButtonState();
+  });
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#ef4444',
+              'primary-btn': '#ef4444',
+              secondary: '#f97316',
+              muted: '#f5f5f5',
+              background: '#ffffff',
+              border: '#e5e5e5',
+              text: '#262626',
+              warning: '#f59e0b',
+            },
+            fontFamily: {
+              sans: ['Vazirmatn', 'ui-sans-serif', 'system-ui'],
+            },
+          }
+        },
+        plugins: [require('tailwindcss-rtl')],
+      }
+    </script>
+{% endblock extra_js %}
+{% block extra_css %}
+<style>
+  .animate-pulse {
+    animation: pulse 0.5s ease-in-out;
+  }
+  .animate-bounce {
+    animation: bounce 0.5s ease-in-out;
+  }
+  .rotate-90 {
+    transform: rotate(90deg);
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  @keyframes bounce {
+    0%, 20%, 53%, 80%, 100% { transform: translate3d(0, 0, 0); }
+    40%, 43% { transform: translate3d(0, -8px, 0); }
+    70% { transform: translate3d(0, -4px, 0); }
+    90% { transform: translate3d(0, -2px, 0); }
+  }
+  .transition-all {
+    transition: all 0.3s ease;
+  }
+</style>
+{% endblock extra_css %}

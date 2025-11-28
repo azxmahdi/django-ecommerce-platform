@@ -1,0 +1,482 @@
+{% extends "bases/base.html" %}
+{% load price_filters %}
+{% block title %} سبد خرید {% endblock title %}
+{% block extra_css %}
+
+<style>
+    .btn-increment-disabled {
+        opacity: 0.5 !important;
+        pointer-events: none !important;
+        color: #9ca3af !important; 
+    }
+    .quantity-container {
+        margin: 0 auto;
+    }
+</style>
+{% endblock extra_css %}
+{% block content %}
+        <div class="container pb-14">
+          <div class="grid grid-cols-12 gap-2 lg:gap-6">
+            <!-- breadCrumb -->
+            <div class="col-span-12 rounded-lg bg-muted">
+              <ol class="grid grid-cols-3 overflow-hidden rounded-lg">
+                <li
+                  class="flex flex-col items-center justify-center gap-2 bg-primary/10 p-4 text-xs text-primary /10 sm:text-sm md:text-base"
+                >
+                  <svg class="h-6 w-6 md:h-8 md:w-8">
+                    <use xlink:href="#cart" />
+                  </svg>
+                  <p class="leading-none">سبد خرید</p>
+                </li>
+                <li
+                  class="flex flex-col items-center justify-center gap-2 p-4 text-xs text-primary opacity-50 sm:text-sm md:text-base"
+                >
+                  <svg class="h-6 w-6 md:h-8 md:w-8">
+                    <use xlink:href="#delivery-truck" />
+                  </svg>
+                  <p class="leading-none">شیوه ارسال</p>
+                </li>
+                <li
+                  class="flex flex-col items-center justify-center gap-2 p-4 text-xs text-primary opacity-50 sm:text-sm md:text-base"
+                >
+                  <svg class="h-6 w-6 md:h-8 md:w-8">
+                    <use xlink:href="#credit" />
+                  </svg>
+                  <p class="leading-none">پرداخت</p>
+                </li>
+              </ol>
+            </div>
+            <!-- Cart List -->
+            <div class="col-span-12 md:col-span-8">
+              <div class="rounded-lg bg-muted p-4">
+                <!-- Heading -->
+                <div class="flex items-center justify-between gap-x-2 pb-4">
+                  <h1
+                    class="flex items-center gap-x-4 text-sm xs:text-base md:text-lg"
+                  >
+                    سبد خرید
+                    <span class="text-sm text-text/60"> ( <span id="cart-total-count">{{ total_quantity }}</span> کالا ) </span>
+                  </h1>
+                  <button type="button" class="btn-red-nobg px-3 py-2 text-sm remove-all-btn" id="remove-all-btn">
+                    <span>
+                      <svg class="h-6 w-6">
+                        <use xlink:href="#trash"></use>
+                      </svg>
+                    </span>
+                    <span>حذف همه<span>
+                  </button> 
+                </div>
+                <ul class="divide-y" id="cart-items-container">
+                  <!-- Cart Item-->
+                   {% for cart_item in cart.cart_items.values %}
+                  <li class="cart-item" data-variant-id="{{ cart_item.variant_obj.id }}">
+                    <div class="py-4 sm:py-6">
+                      <div
+                        class="grid grid-cols-2 items-center justify-start gap-2 xs:grid-cols-3 xs:gap-6 sm:grid-cols-4 xl:grid-cols-6"
+                      >
+                        <!-- Image -->
+                        <div class="relative row-span-2 min-w-fit xs:mx-auto">
+                          <a href="{% url "shop:product-detail" slug=cart_item.variant_obj.product.slug%}">
+                            <img
+                              alt="{{ cart_item.variant_obj.product.name }}"
+                              class="w-25 rounded-lg sm:w-28"
+                              src="{{ cart_item.variant_obj.product.image.url }}"
+                            />
+                          </a>
+                          <button
+                            class="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-background remove-product-btn"
+                            type="button"
+                            title="حذف"
+                          >
+                            <svg class="h-6 w-6 text-red-600 dark:text-red-500">
+                              <use xlink:href="#close"></use>
+                            </svg>
+                          </button>
+                        </div>
+                        <!-- Detail -->
+                        <div
+                          class="row-span-2 space-y-4 xs:col-span-2 sm:col-span-3 xl:col-span-5"
+                        >
+                          <!-- Title -->
+                          <a class="line-clamp-2 text-sm xs:text-base" href="{% url "shop:product-detail" slug=cart_item.variant_obj.product.slug%}">
+                            {{ cart_item.variant_obj.product.name }}
+                          </a>
+                          <!-- Variant -->
+                          <div class="flex items-center gap-x-2">
+                            <span class="text-xs text-text/90 xs:text-sm">
+                              {{ cart_item.variant_obj.attribute_value.value }}</span
+                            >
+                          </div>
+                        </div>
+                        <!-- Quantity -->
+                        <div
+                          class="flex items-center gap-x-2 xs:justify-center"
+                        >
+                          <div
+                            class="flex h-10 w-24 items-center justify-between gap-x-3 rounded-lg border py-1 sm:w-28 quantity-container"
+                            data-max-stock="{{ cart_item.variant_obj.stock }}"
+                          >
+                            <button type="button" class="increment-btn {% if cart_item.quantity >= cart_item.variant_obj.stock %}btn-increment-disabled{% endif %}" {% if cart_item.quantity >= cart_item.variant_obj.stock %}disabled{% endif %} title="افزایش">
+                              <svg class="h-5 w-5 text-primary sm:h-6 sm:w-6">
+                                <use xlink:href="#plus" />
+                              </svg>
+                            </button>
+                            <input
+                              value="{{ cart_item.quantity }}"
+                              disabled
+                              type="number"
+                              class="quantity-input flex h-5 w-5 select-none items-center justify-center bg-transparent text-center text-sm font-medium outline-hidden sm:h-6 sm:w-6 sm:text-lg"
+                            />
+                            <button type="button" class="decrement-btn" {% if cart_item.quantity <= 1 %}disabled{% endif %} title="کاهش">
+                              <svg
+                                class="h-5 w-5 text-red-600 dark:text-red-500 sm:h-6 sm:w-6 {% if cart.quantity <= 1 %}opacity-50{% endif %}"
+                              >
+                                <use xlink:href="#minus" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                        <!-- Price -->
+                        <div
+                          class="text-primary xs:col-span-2 sm:col-span-3 lg:text-lg xl:col-span-5"
+                        >
+                          <span class="font-bold item-total-price">{{ cart_item.total_price_with_discount|format_price }}</span>
+                          <span class="text-sm lg:text-base">تومان</span>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                  {% empty %}
+                    <li class="py-4 text-center text-text/60">سبد خرید شما خالی است.</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+            <!-- Cart Price Detail -->
+            <div class="col-span-12 md:col-span-4">
+              <!-- Desktop -->
+              <div class="hidden rounded-lg bg-muted p-4 md:block" id="cart-summary">
+                <div class="mb-2 divide-y">
+                  <!-- cart items price before discount - coupon -->
+                  <div class="flex items-center justify-between gap-x-2 py-6">
+                    <div class="text-sm text-text/90 lg:text-base">
+                      قیمت کالا ها (<span id="summary-total-count">{{ cart.total_quantity }}</span>)
+                    </div>
+                    <div class="text-sm text-primary lg:text-base">
+                      <span class="font-bold" id="summary-total-amount">{{ cart.total_amount_without_discount|format_price }}</span>
+                      <span class="text-xs lg:text-sm">تومان</span>
+                    </div>
+                  </div>
+                  <!-- Discount -->
+                  <div class="flex items-center justify-between gap-x-2 py-6">
+                    <div class="text-sm text-text/90 lg:text-base">تخفیف</div>
+                    <div
+                      class="text-sm font-medium text-red-500 dark:text-red-400 lg:text-base"
+                    >
+                      <span class="font-bold" id="summary-total-discount">{{ cart.total_amount_discounts|format_price }}</span>
+                      <span class="text-xs lg:text-sm">تومان</span>
+                    </div>
+                  </div>
+                  <!-- Order final price -->
+                  <div class="flex items-center justify-between gap-x-2 py-6">
+                    <div class="text-sm text-text/90 lg:text-base">
+                      مبلغ قابل پرداخت
+                    </div>
+                    <div class="text-sm text-primary lg:text-base">
+                      <span class="font-bold" id="summary-final-amount">{{ cart.total_payment_amount|format_price }}</span>
+                      <span class="text-xs lg:text-sm">تومان</span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <a href="{% url 'order:checkout-shipping' %}" class="btn-primary py-3 w-full text-center">
+                    ادامه فرایند خرید
+                  </a>
+                </div>
+              </div>
+              <!-- Mobile -->
+              <div
+                class="fixed inset-x-0 bottom-0 flex items-center gap-x-6 rounded-t-2xl bg-muted p-4 md:hidden"
+              >
+                <a
+                  class="btn-primary grow py-3 text-center"
+                  href="{% url 'cart:checkout' %}" 
+                >
+                  ادامه فرایند خرید</a
+                >
+                <div class="flex flex-col items-center gap-y-1">
+                  <div class="text-sm text-text/60">مبلغ قابل پرداخت</div>
+                  <div class="text-text/90">
+                    <span class="font-bold" id="mobile-final-amount">{{ total_payment_amount|format_price }}</span>
+                    <span class="text-sm">تومان</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endblock content %}
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+<script>
+$(document).ready(function () {
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    function showToast(message, isSuccess = true) {
+        Toastify({
+            text: message,
+            duration: 3000,
+            newWindow: true,
+            close: true,
+            gravity: "top", 
+            position: "left", 
+            stopOnFocus: true,
+            style: {
+                background: isSuccess ? "linear-gradient(to right, #00b09b, #96c93d)" : "linear-gradient(to right, #ff416c, #ff4b2b)",
+            },
+            onClick: function(){} 
+        }).showToast();
+    }
+
+    function updateCartUI(data) {
+        $('#cart-total-count').text(data.total_quantity);
+        $('#summary-total-count').text(data.total_quantity);
+        $('#summary-total-amount').text(new Intl.NumberFormat('fa-IR').format(data.total_amount_without_discount));
+        $('#summary-total-discount').text(new Intl.NumberFormat('fa-IR').format(data.total_amount_discounts));
+        $('#summary-final-amount').text(new Intl.NumberFormat('fa-IR').format(data.total_payment_amount));
+        $('#mobile-final-amount').text(new Intl.NumberFormat('fa-IR').format(data.total_payment_amount));
+
+        const $container = $('#cart-items-container');
+        $container.empty(); 
+
+        if (Object.keys(data.cart_items).length === 0) {
+             $container.append('<li class="py-4 text-center text-text/60">سبد خرید شما خالی است.</li>');
+             return; 
+        }
+
+        for (const key of Object.keys(data.cart_items)) {  
+          const itemData = data.cart_items[key];
+          const variantId = key.replace("v", "");        
+      
+            const itemHtml = `
+            <li class="cart-item" data-variant-id="${itemData.variant_info.id}">
+                <div class="py-4 sm:py-6">
+                  <div class="grid grid-cols-2 items-center justify-start gap-2 xs:grid-cols-3 xs:gap-6 sm:grid-cols-4 xl:grid-cols-6">
+                    <!-- Image -->
+                    <div class="relative row-span-2 min-w-fit xs:mx-auto">
+                      <a href="#">
+                        <img alt="${itemData.variant_info.product_name}" class="w-25 rounded-lg sm:w-28"
+                          src="${itemData.variant_info.product_image_url || '/static/path/to/default/image.jpg'}" />
+                      </a>
+                      <button class="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-background remove-product-btn"
+                        type="button" title="حذف">
+                        <svg class="h-6 w-6 text-red-600 dark:text-red-500">
+                          <use xlink:href="#close"></use>
+                        </svg>
+                      </button>
+                    </div>
+                    <!-- Detail -->
+                    <div class="row-span-2 space-y-4 xs:col-span-2 sm:col-span-3 xl:col-span-5">
+                      <!-- Title -->
+                      <a class="line-clamp-2 text-sm xs:text-base" href="#">
+                        ${itemData.variant_info.product_name}
+                      </a>
+                      <!-- Variant -->
+                      <div class="flex items-center gap-x-2">
+                        <span class="text-xs text-text/90 xs:text-sm">
+                          ${itemData.variant_info.attribute_value}</span>
+                      </div>
+                    </div>
+                    <!-- Quantity -->
+                    <div class="flex items-center gap-x-2 xs:justify-center">
+                      <div class="flex h-10 w-24 items-center justify-between gap-x-3 rounded-lg border py-1 sm:w-28 quantity-container"
+                        data-max-stock="${itemData.variant_info.stock}">
+                        <button type="button" class="increment-btn ${itemData.quantity >= itemData.variant_info.stock ? 'btn-increment-disabled' : ''}" ${itemData.quantity >= itemData.variant_info.stock ? 'disabled' : ''} title="افزایش">
+                          <svg class="h-5 w-5 text-primary sm:h-6 sm:w-6">
+                            <use xlink:href="#plus" />
+                          </svg>
+                        </button>
+                        <input value="${itemData.quantity}" disabled type="number"
+                          class="quantity-input flex h-5 w-5 select-none items-center justify-center bg-transparent text-center text-sm font-medium outline-hidden sm:h-6 sm:w-6 sm:text-lg" />
+                        <button type="button" class="decrement-btn" ${itemData.quantity <= 1 ? 'disabled' : ''} title="کاهش">
+                          <svg class="h-5 w-5 text-red-600 dark:text-red-500 sm:h-6 sm:w-6 ${itemData.quantity <= 1 ? 'opacity-50' : ''}">
+                            <use xlink:href="#minus" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    <!-- Price -->
+                    <div class="text-primary xs:col-span-2 sm:col-span-3 lg:text-lg xl:col-span-5">
+                      <span class="font-bold item-total-price">${new Intl.NumberFormat('fa-IR').format(itemData.total_price_with_discount)}</span>
+                      <span class="text-sm lg:text-base">تومان</span>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            `;
+            $container.append(itemHtml);
+        }
+    }
+
+
+    $(document).on('click', '.remove-product-btn', function (e) {
+        e.preventDefault(); 
+        const $item = $(this).closest('.cart-item');
+        const variantId = $item.data('variant-id');
+
+        if (!variantId) {
+            showToast("خطا: اطلاعات محصول یافت نشد.", false);
+            return;
+        }
+
+        $.ajax({
+            url: "{% url 'cart:remove-product' %}",
+            type: "POST",
+            headers: {
+                "X-CSRFToken": csrftoken
+            },
+            data: {
+                variant_id: variantId
+            },
+            dataType: 'json', 
+            success: function (response) {
+                if (response.status === "success") {
+                    updateCartUI(response);
+                    showToast(response.message, true);
+                } else {
+                    showToast(response.message || "خطا در حذف محصول.", false);
+                }
+            },
+            error: function (xhr, status, error) {
+                 console.error("AJAX Error (Remove):", status, error);
+                 console.error("Response Text:", xhr.responseText);
+                showToast("خطای شبکه یا سرور در حذف محصول.", false);
+            }
+        });
+    });
+
+
+
+
+
+
+
+    $(document).on('click', '.remove-all-btn', function (e) {
+      e.preventDefault();
+      const $item = $(this).closest('.cart-item');
+
+
+
+      $.ajax({
+          url: "{% url 'cart:clear' %}",
+          type: "POST",
+          headers: {
+              "X-CSRFToken": csrftoken
+          },
+
+          dataType: 'json',
+          success: function (response) {
+              if (response.status === "success") {
+                  updateCartUI(response);
+                  showToast(response.message, true);
+              } else {
+                  showToast(response.message || "خطا در حذف محصولات.", false);
+              }
+          },
+          error: function (xhr, status, error) {
+               console.error("AJAX Error (Remove):", status, error);
+               console.error("Response Text:", xhr.responseText);
+              showToast("خطای شبکه یا سرور در حذف محصولات.", false);
+          }
+      });
+  });
+
+
+
+
+
+
+
+
+    $(document).on('click', '.increment-btn, .decrement-btn', function (e) {
+        e.preventDefault();
+        const $btn = $(this);
+        const $container = $btn.closest('.quantity-container');
+        const $input = $container.find('.quantity-input');
+        const variantId = $btn.closest('.cart-item').data('variant-id');
+        const maxStock = parseInt($container.data('max-stock'));
+        let currentQuantity = parseInt($input.val());
+
+        if (isNaN(currentQuantity) || currentQuantity < 1) currentQuantity = 1;
+
+        let newQuantity;
+        if ($btn.hasClass('increment-btn')) {
+            if (currentQuantity >= maxStock) {
+                showToast("تعداد انتخابی بیشتر از موجودی است", false);
+                return;
+            }
+            newQuantity = currentQuantity + 1;
+        } else if ($btn.hasClass('decrement-btn')) {
+            if (currentQuantity <= 1) return;
+            newQuantity = currentQuantity - 1;
+        } else {
+            return; 
+        }
+
+        $.ajax({
+            url: "{% url 'cart:update-quantity-product' %}",
+            type: "POST",
+            headers: {
+                "X-CSRFToken": csrftoken
+            },
+            data: {
+                variant_id: variantId,
+                quantity: newQuantity
+            },
+            dataType: 'json',
+            beforeSend: function() {
+                $btn.prop('disabled', true);
+                $container.find('.increment-btn, .decrement-btn').prop('disabled', true);
+            },
+            success: function (response) {
+                if (response.status === "success" || response.cart_items !== undefined) {
+                    updateCartUI(response);
+                    
+                    if (response.status === "error") {
+                        showToast(response.message || "خطا در به‌روزرسانی تعداد.", false);
+                    }
+                } else {
+                    $input.val(currentQuantity);
+                    showToast(response.message || "خطا در به‌روزرسانی تعداد.", false);
+                }
+            },
+            error: function (xhr, status, error) {
+                 console.error("AJAX Error (Update Quantity):", status, error);
+                 console.error("Response Text:", xhr.responseText);
+                $input.val(currentQuantity);
+                showToast("خطای شبکه یا سرور در به‌روزرسانی تعداد.", false);
+            },
+            complete: function() {
+                 $container.find('.increment-btn, .decrement-btn').prop('disabled', false);
+            }
+        });
+    });
+
+});
+</script>
+{% endblock extra_js %}

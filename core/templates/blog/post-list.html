@@ -1,0 +1,590 @@
+{% extends "bases/base_with_cart_icon.html" %}
+{% load jalali_tags %}
+
+{% block title %} وبلاگ {% endblock title %}
+{% block extra_css %}
+<style>
+  @media (max-width: 768px) {
+    .option-item {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0.6rem 1rem;
+      border-radius: 0.5rem;
+      background: #fff;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+    .option-item .tick-icon {
+      display: none;
+      width: 18px;
+      height: 18px;
+      color: #059669;
+    }
+    .option-item.active {
+      border-color: #059669;
+      background: rgba(5, 150, 105, 0.08);
+    }
+    .radio-hidden {
+      appearance: none;
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .mobile-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .mobile-modal {
+      background: var(--color-bg, #fff);
+      width: 92%;
+      max-height: 90%;
+      border-radius: 1rem;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      transform: translateY(24px);
+      opacity: 0;
+      transition: transform 0.28s ease, opacity 0.28s ease;
+    }
+    .mobile-modal.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    .mobile-modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1rem;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      font-weight: 700;
+    }
+    .mobile-modal-body {
+      padding: 1rem;
+      max-height: calc(90vh - 58px - 64px);
+      overflow-y: auto;
+    }
+    .mobile-modal-footer {
+      padding: 0.75rem 1rem;
+      border-top: 1px solid rgba(0,0,0,0.06);
+      display: flex; gap: 0.75rem;
+    }
+    .mobile-show { display: flex !important; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 0.75rem; padding: 0.75rem 1rem; font-weight: 600;
+    }
+    .btn-primary { background: #059669; color: #fff; }
+    .btn-ghost { background: transparent; color: inherit; }
+  }
+
+  @media (max-width: 768px) {
+    .dark .mobile-modal {
+      background-color: #18181b;
+      color: #f4f4f5;
+    }
+    .dark .mobile-modal-header,
+    .dark .mobile-modal-footer {
+      border-color: rgba(255,255,255,0.15);
+    }
+    .dark .mobile-modal-body input[type="text"],
+    .dark .mobile-modal-body input[type="search"] {
+      background-color: #27272a;
+      color: #f4f4f5;
+      border-color: rgba(255,255,255,0.2);
+    }
+    .dark .mobile-modal-body input::placeholder {
+      color: rgba(255,255,255,0.6);
+    }
+    .dark .option-item {
+      background-color: #27272a;
+      color: #f4f4f5;
+      border-color: rgba(255,255,255,0.1);
+    }
+    .dark .option-item.active {
+      background-color: rgba(5, 150, 105, 0.25);
+      border-color: #10b981;
+    }
+    .dark .option-item .tick-icon {
+      color: #10b981;
+    }
+    .dark .mobile-modal-body button {
+      background-color: #27272a;
+      color: #f4f4f5;
+    }
+    .dark .mobile-modal-body button.sort-button-active {
+      background-color: rgba(5,150,105,0.25);
+      color: #10b981;
+    }
+  }
+</style>
+{% endblock extra_css %}
+
+
+{% block content %}
+<div class="container relative">
+  <!-- Mobile Options Section -->
+  <div class="mb-6 flex items-center justify-center gap-x-4 md:hidden">
+    <!-- Filter -->
+    <button
+      id="openFilterMobile"
+      aria-controls="shop-filter-drawer-navigation"
+      class="flex w-full items-center gap-x-4 rounded-lg bg-muted px-4 py-3 text-sm xs:text-base"
+      type="button"
+    >
+      <svg class="h-6 w-6"><use xlink:href="#filter" /></svg>
+      <div>فیلتر</div>
+    </button>
+    <!-- Sort -->
+    <button
+      id="openSortMobile"
+      aria-controls="shop-sort-drawer-navigation"
+      class="flex w-full items-center gap-x-4 rounded-lg bg-muted px-4 py-3 text-sm xs:text-base"
+      type="button"
+    >
+      <svg class="h-6 w-6"><use xlink:href="#sort" /></svg>
+      <div>مرتب سازی</div>
+    </button>
+  </div>
+
+  <!-- Filter Modal (Mobile) -->
+  <div id="filterModalBackdrop" class="mobile-modal-backdrop md:hidden">
+    <div class="mobile-modal" role="dialog" aria-modal="true">
+      <div class="mobile-modal-header">
+        <span>فیلترها</span>
+        <button type="button" id="closeFilterMobile" aria-label="بستن" class="p-2 rounded hover:bg-muted">
+          <svg class="h-6 w-6"><use xlink:href="#close" /></svg>
+        </button>
+      </div>
+      <form id="mobileFilterForm" method="get">
+        {% for key, value in request.GET.items %}
+          {% if key != 'q' and key != 'category_slug' and key != 'is_hot' %}
+            <input type="hidden" name="{{ key }}" value="{{ value }}">
+          {% endif %}
+        {% endfor %}
+
+        <div class="mobile-modal-body" dir="rtl">
+          <!-- Title row with clear-all -->
+          <div class="mb-4 flex items-center justify-between">
+            <div class="text-sm text-text/70">اعمال فیلتر روی نتایج</div>
+            <a href="{% url 'blog:post-list' %}" class="text-sm text-primary hover:underline">حذف همه</a>
+          </div>
+
+          <!-- Search -->
+          <div class="mb-4">
+            <label class="sr-only">Blog search</label>
+            <input
+              name="q"
+              value="{{ request.GET.q }}"
+              class="w-full rounded-lg border px-3 py-3 text-text/90 outline-none placeholder:text-sm placeholder:text-text/60"
+              placeholder="جستجو در بین نتایج ..."
+              type="text"
+            />
+          </div>
+
+          <!-- Categories (radio + tick) -->
+          <details class="[&_summary::-webkit-details-marker]:hidden group mb-4" {% if request.GET.category_slug %}open{% endif %}>
+            <summary class="flex cursor-pointer items-center justify-between rounded-lg py-2">
+              <span class="font-semibold">دسته‌بندی‌ها</span>
+              <span class="shrink-0 transition duration-200 group-open:-rotate-90">
+                <svg class="h-5 w-5"><use xlink:href="#chevron-left" /></svg>
+              </span>
+            </summary>
+
+            <div class="mt-2 max-h-60 space-y-2 overflow-y-auto rounded-lg bg-background dark:bg-zinc-800">
+              <!-- همه -->
+              <label class="option-item {% if not request.GET.category_slug %}active{% endif %}">
+                <span>همه دسته‌ها</span>
+                <input
+                  class="radio-hidden"
+                  type="radio"
+                  name="category_slug"
+                  value=""
+                  {% if not request.GET.category_slug %}checked{% endif %}
+                />
+                <svg class="tick-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </label>
+
+              {% for post_category in post_categories %}
+                <label class="option-item {% if request.GET.category_slug == post_category.slug|stringformat:'s' %}active{% endif %}">
+                  <span>{{ post_category.name }}</span>
+                  <input
+                    class="radio-hidden"
+                    type="radio"
+                    name="category_slug"
+                    value="{{ post_category.slug }}"
+                    {% if request.GET.category_slug == post_category.slug|stringformat:'s' %}checked{% endif %}
+                  />
+                  <svg class="tick-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </label>
+              {% empty %}
+                <div class="px-4 py-2 text-sm text-gray-500">دسته‌بندی موجود نیست</div>
+              {% endfor %}
+            </div>
+          </details>
+
+          <label for="onlyHotMobile" class="flex w-full cursor-pointer items-center justify-between py-3 select-none">
+            <div>داغ‌ترین‌ها</div>
+            <div class="relative inline-flex items-center">
+              <input
+                class="peer sr-only"
+                id="onlyHotMobile"
+                name="is_hot"
+                value="True"
+                type="checkbox"
+                {% if request.GET.is_hot == 'True' %}checked{% endif %}
+              />
+              <div class="relative h-6 w-11 rounded-full bg-zinc-200 transition-colors after:absolute after:left-[2px] after:top-0.5 after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full"></div>
+            </div>
+          </label>
+        </div>
+
+        <div class="mobile-modal-footer">
+          <button type="button" id="resetFilterMobile" class="btn btn-ghost w-1/3">پاک‌سازی</button>
+          <button type="submit" id="applyFilterMobile" class="btn btn-primary w-2/3">اعمال</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Sort Modal (Mobile) -->
+  <div id="sortModalBackdrop" class="mobile-modal-backdrop md:hidden">
+    <div class="mobile-modal" role="dialog" aria-modal="true">
+      <div class="mobile-modal-header">
+        <span>مرتب‌سازی</span>
+        <button type="button" id="closeSortMobile" aria-label="بستن" class="p-2 rounded hover:bg-muted">
+          <svg class="h-6 w-6"><use xlink:href="#close" /></svg>
+        </button>
+      </div>
+      <div class="mobile-modal-body" dir="rtl">
+        <div class="space-y-2">
+          <form method="get">
+            {% for key, value in request.GET.items %}
+              {% if key != 'order_by' %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+              {% endif %}
+            {% endfor %}
+            <button
+              name="order_by"
+              value="-created_date"
+              type="submit"
+              class="w-full rounded-lg px-4 py-3 text-right hover:bg-background {% if request.GET.order_by == '-created_date' or not request.GET.order_by %}sort-button-active{% endif %}"
+            >
+              جدید ترین
+            </button>
+          </form>
+
+          <form method="get">
+            {% for key, value in request.GET.items %}
+              {% if key != 'order_by' %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+              {% endif %}
+            {% endfor %}
+            <button
+              name="order_by"
+              value="-view_count"
+              type="submit"
+              class="w-full rounded-lg px-4 py-3 text-right hover:bg-background {% if request.GET.order_by == '-view_count' %}sort-button-active{% endif %}"
+            >
+              پربازدید ترین
+            </button>
+          </form>
+        </div>
+      </div>
+      <div class="mobile-modal-footer">
+        <button type="button" id="closeSortMobileFooter" class="btn btn-ghost w-full">بستن</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-12 grid-rows-[60px_min(500px,_1fr)] gap-4">
+    <!-- Desktop Filter Section -->
+    <div class="col-span-4 row-span-2 hidden md:block lg:col-span-3">
+      <div class="sticky top-32 mb-4 overflow-hidden rounded-lg bg-muted shadow-base">
+        <div dir="ltr" class="flex max-h-[calc(95vh_-_100px)] flex-col overflow-y-auto overflow-x-hidden px-4 py-3">
+          <div dir="rtl">
+            <!-- Title -->
+            <div class="mb-6 flex items-center justify-between">
+              <h3 class="xl:text-lg">فیلتر ها</h3>
+              <a href="{% url 'blog:post-list' %}" class="btn-primary-nobg py-2 text-sm">حذف همه</a>
+            </div>
+
+            <ul class="space-y-6">
+              <!-- Search -->
+              <li>
+                <form method="get">
+                  {% for key, value in request.GET.items %}
+                    {% if key != 'q' %}
+                      <input type="hidden" name="{{ key }}" value="{{ value }}">
+                    {% endif %}
+                  {% endfor %}
+                  <label class="sr-only">Blog search</label>
+                  <input
+                    name="q"
+                    value="{{ request.GET.q }}"
+                    class="w-full rounded-lg border-none bg-background px-2 py-3 text-text/90 outline-none placeholder:text-sm placeholder:text-text/60 focus:ring-0"
+                    placeholder="جستجو در بین نتایج ..."
+                    type="text"
+                  />
+                </form>
+              </li>
+
+              <li>
+                <details class="[&_summary::-webkit-details-marker]:hidden group" {% if request.GET.category_slug %}open{% endif %}>
+                  <summary class="flex cursor-pointer items-center justify-between rounded-lg py-3">
+                    <span> دسته بندی ها </span>
+                    <span class="shrink-0 transition duration-200 group-open:-rotate-90">
+                      <svg class="h-5 w-5"><use xlink:href="#chevron-left" /></svg>
+                    </span>
+                  </summary>
+
+                  <ul class="mt-2 max-h-60 space-y-2 overflow-y-auto rounded-lg bg-background dark:bg-zinc-800">
+                    {% for post_category in post_categories %}
+                      <li>
+                        <a
+                          class="flex items-center justify-between rounded-lg px-4 py-2 {% if request.GET.category_slug == post_category.slug|stringformat:'s' %}sort-button-active{% endif %}"
+                          href="?{% if querystring %}{{ querystring }}&{% endif %}category_slug={{ post_category.slug }}"
+                        >
+                          <span>{{ post_category.name }}</span>
+                          <svg class="h-5 w-5"><use xlink:href="#chevron-left" /></svg>
+                        </a>
+                      </li>
+                    {% empty %}
+                      <li class="px-4 py-2 text-sm text-gray-500">دسته‌بندی موجود نیست</li>
+                    {% endfor %}
+                  </ul>
+                </details>
+              </li>
+
+              <li>
+                <form method="get">
+                  {% for key, value in request.GET.items %}
+                    {% if key != 'is_hot' %}
+                      <input type="hidden" name="{{ key }}" value="{{ value }}">
+                    {% endif %}
+                  {% endfor %}
+                  <label class="flex cursor-pointer items-center justify-between py-3" for="onlyHotDesktop">
+                    <div>داغ‌ ترین ها</div>
+                    <div class="relative inline-flex cursor-pointer items-center">
+                      <input
+                        class="peer sr-only"
+                        id="onlyHotDesktop"
+                        name="is_hot"
+                        value="True"
+                        type="checkbox"
+                        onchange="this.form.submit()"
+                        {% if request.GET.is_hot == 'True' %}checked{% endif %}
+                      />
+                      <div class="peer h-6 w-11 rounded-full bg-background after:absolute after:left-[2px] after:top-0.5 after:h-5 after:w-5 after:rounded-full after:bg-muted after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-focus:ring-emerald-500 dark:bg-zinc-800"></div>
+                    </div>
+                  </label>
+                </form>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Desktop Content -->
+    <div class="col-span-12 space-y-4 md:col-span-8 lg:col-span-9">
+      <!-- Desktop Sort Section -->
+      <div class="hidden md:block">
+        <div class="flex h-14 items-center gap-x-2 rounded-lg bg-muted px-2 text-text/90 shadow-base lg:px-4">
+          <div class="flex items-center gap-x-2 text-sm lg:text-base">
+            <svg class="h-6 w-6"><use xlink:href="#sort" /></svg>
+            <p>مرتب سازی بر اساس</p>
+          </div>
+
+          <form method="get">
+            {% for key, value in request.GET.items %}
+              {% if key != 'order_by' %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+              {% endif %}
+            {% endfor %}
+            <input type="hidden" name="order_by" value="-created_date">
+            <button
+              type="submit"
+              class="rounded-lg px-1 py-2 text-sm hover:bg-background lg:px-4 {% if request.GET.order_by == '-created_date' or not request.GET.order_by %}sort-button-active{% endif %}"
+            >
+              جدید ترین
+            </button>
+          </form>
+
+          <form method="get">
+            {% for key, value in request.GET.items %}
+              {% if key != 'order_by' %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+              {% endif %}
+            {% endfor %}
+            <input type="hidden" name="order_by" value="-view_count">
+            <button
+              type="submit"
+              class="rounded-lg px-1 py-2 text-sm hover:bg-background lg:px-4 {% if request.GET.order_by == '-view_count' %}sort-button-active{% endif %}"
+            >
+              پربازدید ترین
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Blogs Grid -->
+      <div class="grid grid-cols-2 gap-px gap-y-2 xs:gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {% for post in posts %}
+        <div class="border-gradient group relative rounded-base p-px before:absolute before:-inset-px before:h-[calc(100%+2px)] before:w-[calc(100%+2px)] before:rounded-base">
+          <div>
+            <a href="{% url 'blog:post-detail' slug=post.slug %}">
+              <div class="relative rounded-xl bg-muted p-2 shadow-base">
+                <div class="mb-2 md:mb-5" draggable="false">
+                  <img alt="blog" class="mx-auto w-auto rounded-lg rounded-bl-3xl" src="{{ post.image.url }}" />
+                </div>
+                <div class="mb-2">
+                  <p class="line-clamp-2 h-12 text-sm md:text-base">{{ post.title }}</p>
+                </div>
+                <div class="flex justify-end">
+                  <p class="text-xs text-primary xs:text-sm">{{ post.published_date|jalali_date }}</p>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+        {% empty %}
+          <p class="text-sm text-text/60">پستی یافت نشد</p>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      <div class="flex items-center justify-center gap-x-4 md:justify-end">
+
+        {% if page_obj.has_previous %}
+          <a
+            class="pagination-button flex items-center justify-center"
+            href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}"
+          >
+            <svg class="h-6 w-6"><use xlink:href="#chevron-right"></use></svg>
+          </a>
+        {% endif %}
+        
+        <div class="flex items-center gap-x-2">
+          {% for item in page_items %}
+            {% if item.ellipsis %}
+              <p class="text-sm text-text/60">...</p>
+            {% else %}
+              {% if item.number == page_obj.number %}
+                <a class="pagination-button pagination-button-active" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ item.number }}">
+                  {{ item.number }}
+                </a>
+              {% else %}
+                <a class="pagination-button" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ item.number }}">
+                  {{ item.number }}
+                </a>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        </div>
+      
+        {% if page_obj.has_next %}
+          <a
+            class="flex h-8 w-8 items-center justify-center rounded-full bg-muted transition-all duration-200 hover:bg-primary hover:text-white hover:dark:bg-emerald-600"
+            href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}"
+          >
+            <svg class="h-6 w-6"><use xlink:href="#chevron-left"></use></svg>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const filterBackdrop = document.getElementById('filterModalBackdrop');
+  const filterModal = filterBackdrop ? filterBackdrop.querySelector('.mobile-modal') : null;
+  const openFilterBtn = document.getElementById('openFilterMobile');
+  const closeFilterBtn = document.getElementById('closeFilterMobile');
+
+  function openFilter() {
+    if (!filterBackdrop || !filterModal) return;
+    filterBackdrop.classList.add('mobile-show');
+    setTimeout(()=> filterModal.classList.add('show'), 10);
+  }
+  function closeFilter() {
+    if (!filterBackdrop || !filterModal) return;
+    filterModal.classList.remove('show');
+    setTimeout(()=> filterBackdrop.classList.remove('mobile-show'), 280);
+  }
+  openFilterBtn && openFilterBtn.addEventListener('click', openFilter);
+  closeFilterBtn && closeFilterBtn.addEventListener('click', closeFilter);
+  filterBackdrop && filterBackdrop.addEventListener('click', (e)=> { if(e.target===filterBackdrop) closeFilter(); });
+
+  const categoryContainer = filterBackdrop ? filterBackdrop.querySelector('.mobile-modal-body') : null;
+  if (categoryContainer) {
+    categoryContainer.addEventListener('change', (e) => {
+      if (e.target && e.target.name === 'category_slug') {
+        const labels = categoryContainer.querySelectorAll('.option-item');
+        labels.forEach(l => l.classList.remove('active'));
+        const label = e.target.closest('.option-item');
+        if (label) label.classList.add('active');
+      }
+    });
+  }
+
+  const filterForm = document.getElementById('mobileFilterForm');
+  const resetBtn = document.getElementById('resetFilterMobile');
+  resetBtn && resetBtn.addEventListener('click', () => {
+    const q = filterForm.querySelector('input[name="q"]');
+    if (q) q.value = '';
+    const labels = filterForm.querySelectorAll('.option-item');
+    labels.forEach(l => l.classList.remove('active'));
+    const allRadio = filterForm.querySelector('input[name="category_slug"][value=""]');
+    if (allRadio) {
+      allRadio.checked = true;
+      const lbl = allRadio.closest('.option-item');
+      if (lbl) lbl.classList.add('active');
+    }
+    const hot = filterForm.querySelector('#onlyHotMobile');
+    if (hot) hot.checked = false;
+  });
+
+  filterForm && filterForm.addEventListener('submit', (e) => {
+    const q = filterForm.querySelector('input[name="q"]');
+    if (q && q.value.trim() === '') q.name = '';
+    const cat = filterForm.querySelector('input[name="category_slug"]:checked');
+    if (cat && cat.value === '') cat.title = '';
+    setTimeout(closeFilter, 10);
+  });
+
+  const sortBackdrop = document.getElementById('sortModalBackdrop');
+  const sortModal = sortBackdrop ? sortBackdrop.querySelector('.mobile-modal') : null;
+  const openSortBtn = document.getElementById('openSortMobile');
+  const closeSortBtn = document.getElementById('closeSortMobile');
+  const closeSortFooterBtn = document.getElementById('closeSortMobileFooter');
+
+  function openSort() {
+    if (!sortBackdrop || !sortModal) return;
+    sortBackdrop.classList.add('mobile-show');
+    setTimeout(()=> sortModal.classList.add('show'), 10);
+  }
+  function closeSort() {
+    if (!sortBackdrop || !sortModal) return;
+    sortModal.classList.remove('show');
+    setTimeout(()=> sortBackdrop.classList.remove('mobile-show'), 280);
+  }
+  openSortBtn && openSortBtn.addEventListener('click', openSort);
+  closeSortBtn && closeSortBtn.addEventListener('click', closeSort);
+  closeSortFooterBtn && closeSortFooterBtn.addEventListener('click', closeSort);
+  sortBackdrop && sortBackdrop.addEventListener('click', (e)=> { if(e.target===sortBackdrop) closeSort(); });
+});
+</script>
+{% endblock extra_js %}

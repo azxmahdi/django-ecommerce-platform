@@ -1,0 +1,955 @@
+{% extends "bases/base.html" %}
+
+{% load price_filters %}
+
+{% block title %} انتخاب آدرس {% endblock title %}
+{% block content %}
+        <div class="container pb-14">
+          <div class="grid grid-cols-12 gap-2 lg:gap-6">
+            <!-- breadCrumb -->
+            <div class="col-span-12 rounded-lg bg-muted">
+              <ol class="grid grid-cols-3 overflow-hidden rounded-lg">
+                <li
+                  class="flex flex-col items-center justify-center gap-2 p-4 text-xs text-primary opacity-50 sm:text-sm md:text-base"
+                >
+                  <svg class="h-6 w-6 md:h-8 md:w-8">
+                    <use xlink:href="#check" />
+                  </svg>
+                  <p class="leading-none">سبد خرید</p>
+                </li>
+                <li
+                  class="flex flex-col items-center justify-center gap-2 bg-primary/10 p-4 text-xs text-primary /10 sm:text-sm md:text-base"
+                >
+                  <svg class="h-6 w-6 md:h-8 md:w-8">
+                    <use xlink:href="#delivery-truck" />
+                  </svg>
+                  <p class="leading-none">شیوه ارسال</p>
+                </li>
+                <li
+                  class="flex flex-col items-center justify-center gap-2 p-4 text-xs text-primary opacity-50 sm:text-sm md:text-base"
+                >
+                  <svg class="h-6 w-6 md:h-8 md:w-8">
+                    <use xlink:href="#credit" />
+                  </svg>
+                  <p class="leading-none">پرداخت</p>
+                </li>
+              </ol>
+            </div>
+            <!-- Content -->
+            <div class="col-span-12 md:col-span-8">
+              <form method="post" class="rounded-lg bg-muted p-4" id="main-form">
+                {% csrf_token %}
+                <!-- Address Section -->
+                <div class="mb-6">
+                  <div class="flex items-center justify-between gap-x-2 pb-4">
+                    <h1
+                      class="flex items-center gap-x-4 text-sm xs:text-base md:text-lg"
+                    >
+                      آدرس تحویل سفارش
+                    </h1>
+                    <button
+                      type="button"
+                      onclick="openModal('address-add-modal')"
+                      class="btn-primary-nobg px-3 py-2 text-sm"
+                    >
+                      <span>
+                        <svg class="h-6 w-6">
+                          <use xlink:href="#address-add"></use>
+                        </svg>
+                      </span>
+                      <span> آدرس جدید </span>
+                    </button>
+                  </div>
+                  {% for address in addresses %}
+                  <fieldset class="space-y-2">
+                    <legend class="sr-only">Address</legend>
+                    <div>
+                      <input
+                        type="radio"
+                        name="address"
+                        value="{{ address.id }}"
+                        id="address-{{ address.id }}"
+                        class="peer hidden"
+                      />
+                      <label
+                        for="address-{{ address.id }}"
+                        class="relative block cursor-pointer rounded-lg border p-4 shadow-base peer-checked:border-emerald-500 hover:border-border/50 dark:peer-checked:border-emerald-400 dark:hover:border-white/10"
+                      >
+                        <div
+                          class="mb-4 flex items-center justify-between gap-x-2 sm:mb-2"
+                        >
+                          <p
+                            class="line-clamp-2 h-10 text-sm text-text/90 xs:text-base sm:line-clamp-1 sm:h-6"
+                          >
+                            {{ address.get_full_address }}
+                          </p>
+                          <div class="hidden md:block">
+                            <button
+                              type="button"
+                              onclick="toggleDropdown('address-option-{{ address.id }}')"
+                              class="rounded-full p-1 text-text/90 hover:bg-background"
+                            >
+                              <svg class="h-6 w-6">
+                                <use xlink:href="#vertical-dot" />
+                              </svg>
+                            </button>
+                            <!-- Dropdown menu -->
+                            <div
+                              class="z-10 absolute ml-5 hidden w-50 overflow-hidden rounded-lg border bg-muted shadow-lg"
+                              id="address-option-{{ address.id }}"
+                            >
+                              <ul class="space-y-2 p-2">
+                                <li>
+                                  <button
+                                    type="button"
+                                    onclick="openModal('address-edit-modal-{{ address.id }}')"
+                                    class="flex w-full items-center justify-between rounded-lg px-4 py-3 text-sky-500 hover:bg-sky-500/10 dark:text-sky-400 dark:hover:bg-sky-400/10"
+                                  >
+                                    <div class="flex items-center gap-x-2">
+                                      <svg class="h-6 w-6">
+                                        <use xlink:href="#address-edit"></use>
+                                      </svg>
+                                      <span> ویرایش </span>
+                                    </div>
+                                  </button>
+                                </li>
+                                <li>
+                                  <button
+                                    type="button"
+                                    onclick="openModal('address-delete-modal-{{ address.id }}')"
+                                    class="flex w-full items-center justify-between rounded-lg px-4 py-3 text-red-500 hover:bg-warning/10 dark:text-red-400 dark:hover:bg-red-400/10"
+                                  >
+                                    <div class="flex items-center gap-x-2">
+                                      <svg class="h-6 w-6">
+                                        <use xlink:href="#address-delete"></use>
+                                      </svg>
+                                      <span> حذف </span>
+                                    </div>
+                                  </button>
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex items-center justify-between gap-x-2">
+                          <p class="line-clamp-1 text-sm text-text/60">
+                            {{ address.get_full_name }}
+                          </p>
+                          <div class="flex items-center gap-x-2 md:hidden">
+                            <button
+                              type="button"
+                              onclick="openModal('address-delete-modal-{{ address.id }}')"
+                              class="btn-red-nobg px-3 py-1 text-sm xs:px-4 xs:py-2"
+                            >
+                              حذف
+                            </button>
+                            <button
+                              type="button"
+                              onclick="openModal('address-edit-modal-{{ address.id }}')"
+                              class="btn-secondary-nobg px-3 py-1 text-sm xs:px-4 xs:py-2"
+                            >
+                              ویرایش
+                            </button>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                  </fieldset>
+                  {% endfor %}
+                </div>
+                <!-- Delivery Section -->
+                <div>
+                  <div class="flex items-center justify-between gap-x-2 pb-4">
+                    <h2
+                      class="flex items-center gap-x-4 text-sm xs:text-base md:text-lg"
+                    >
+                      شیوه ارسال
+                    </h2>
+                  </div>
+                  <fieldset class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    <legend class="sr-only">Delivery</legend>
+                    {% for shipping_method in shipping_methods %}
+                    <div>
+                      <input
+                        type="radio"
+                        name="shipping_method"
+                        value="{{ shipping_method.id }}"
+                        id="delivery-{{ shipping_method.id }}"
+                        class="peer hidden shipping-method-radio"
+                        data-shipping-id="{{ shipping_method.id }}"
+                      />
+                      <label
+                        for="delivery-{{ shipping_method.id }}"
+                        class="relative block h-[116px] cursor-pointer rounded-lg border p-4 shadow-base peer-checked:border-emerald-500 hover:border-border/50 dark:peer-checked:border-emerald-400 dark:hover:border-white/10"
+                      >
+                        <div
+                          class="mb-4 flex items-center justify-between gap-x-2 sm:mb-2"
+                        >
+                          <p
+                            class="line-clamp-1 text-sm text-text/90 xs:text-base"
+                          >
+                            {{ shipping_method.name }}
+                          </p>
+                          <img
+                            src="{{ shipping_method.image.url }}"
+                            alt=""
+                            class="w-25"
+                          />
+                        </div>
+                        <div class="mb-1 text-primary">
+                          <span>{{ shipping_method.price|format_price }}</span>
+                          <span class="text-sm">تومان</span>
+                        </div>
+                        <div class="text-sm text-primary">
+                          <span>  </span>
+                        </div>
+                      </label>
+                    </div>
+                    {% endfor %}
+                  </fieldset>
+                </div>
+              </form>
+            </div>
+            <!-- Cart Price Detail -->
+            <div class="col-span-12 md:col-span-4">
+              <!-- Desktop -->
+              <div class="hidden rounded-lg bg-muted p-4 md:block">
+                <div class="mb-2 divide-y">
+                  <!-- cart items price before discount - coupon -->
+                  <div class="flex items-center justify-between gap-x-2 py-6">
+                    <div class="text-sm text-text/90 lg:text-base">
+                      قیمت کالا ها ({{ cart.total_quantity }})
+                    </div>
+                    <div class="text-sm text-primary lg:text-base">
+                      <span class="font-bold" id="total-amount-without-discount">{{ cart.total_amount_without_discount|format_price }}</span>
+                      <span class="text-xs lg:text-sm">تومان</span>
+                    </div>
+                  </div>
+                  <!-- Discount -->
+                  <div class="flex items-center justify-between gap-x-2 py-6">
+                    <div class="text-sm text-text/90 lg:text-base">تخفیف</div>
+                    <div
+                      class="text-sm font-medium text-red-500 dark:text-red-400 lg:text-base"
+                    >
+                      <span class="font-bold" id="total-amount-discounts">{{ cart.total_amount_discounts|format_price }}</span>
+                      <span class="text-xs lg:text-sm">تومان</span>
+                    </div>
+                  </div>
+                  <!-- delivery price -->
+                  <div class="flex items-center justify-between gap-x-2 py-6">
+                    <div class="text-sm text-text/90 lg:text-base">
+                      هزینه ارسال
+                    </div>
+                    <div class="text-sky-500 dark:text-sky-400  text-sm lg:text-base">
+                    <span class="font-bold" id="shipping-cost">0</span>
+                    <span class="text-xs lg:text-sm">تومان</span>
+                  </div>
+                  </div>
+                  <!-- Order final price -->
+                  <div class="flex items-center justify-between gap-x-2 py-6">
+                    <div class="text-sm text-text/90 lg:text-base">
+                      مبلغ قابل پرداخت
+                    </div>
+                    <div class="text-sm text-primary lg:text-base">
+                      <span class="font-bold" id="total-payment-amount">{{ cart.total_payment_amount|format_price }}</span>
+                      <span class="text-xs lg:text-sm">تومان</span>
+                    </div>
+                  </div>
+                </div>
+                <button type="submit" class="btn-primary py-3 w-full" form="main-form">
+                    ادامه فرایند خرید
+                </button>
+              </div>
+              <!-- Mobile -->
+              <div
+                class="fixed inset-x-0 bottom-0 flex items-center gap-x-6 rounded-t-2xl bg-muted p-4 md:hidden"
+              >
+                <button type="submit" class="btn-primary grow py-3" form="main-form">
+                    ادامه فرایند خرید</button>
+                <div class="flex flex-col items-center gap-y-1">
+                  <div class="text-sm text-text/60">مبلغ قابل پرداخت</div>
+                  <div class="text-text/90">
+                    <span class="font-bold" id="mobile-total-payment-amount">{{ cart.total_payment_amount|format_price }}</span>
+                    <span class="text-sm">تومان</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+      <!-- Address Delete modal -->
+      {% for address in addresses %}
+      <div id="address-delete-modal-{{ address.id }}" class="custom-modal hidden">
+        <div class="custom-modal-overlay" onclick="closeModal('address-delete-modal-{{ address.id }}')"></div>
+        <div class="custom-modal-content">
+          <div class="custom-modal-header">
+            <h3 class="custom-modal-title">حذف آدرس</h3>
+            <button type="button" class="custom-modal-close" onclick="closeModal('address-delete-modal-{{ address.id }}')">
+              <svg class="h-5 w-5">
+                <use xlink:href="#close"></use>
+              </svg>
+            </button>
+          </div>
+          <div class="custom-modal-body">
+            <p class="text-text/90 mb-4">آیا از حذف این آدرس اطمینان دارید؟</p>
+            <div class="flex items-center justify-end gap-x-4">
+              <button
+                class="btn-secondary px-4 py-2 text-sm"
+                onclick="closeModal('address-delete-modal-{{ address.id }}')"
+                type="button"
+              >
+                انصراف
+              </button>
+              <form method="post" action="{% url 'order:delete-address' address.id %}" class="inline">
+                {% csrf_token %}
+                <button class="btn-red px-4 py-2 text-sm" type="submit">
+                  حذف آدرس
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+      <!-- Address Add modal -->
+      <div id="address-add-modal" class="custom-modal hidden">
+        <div class="custom-modal-overlay" onclick="closeModal('address-add-modal')"></div>
+        <div class="custom-modal-content large">
+          <div class="custom-modal-header">
+            <h3 class="custom-modal-title">ثبت آدرس جدید</h3>
+            <button type="button" class="custom-modal-close" onclick="closeModal('address-add-modal')">
+              <svg class="h-5 w-5">
+                <use xlink:href="#close" />
+              </svg>
+            </button>
+          </div>
+          <div class="custom-modal-body">
+            <form method="post" action="{% url 'order:create-address' %}">
+              {% csrf_token %}
+              <input type="hidden" name="user" value="{{ request.user }}">
+              <div class="grid grid-cols-2 gap-x-4 gap-y-5 sm:gap-6">
+                <!-- Receiver name -->
+                <div class="col-span-2 sm:col-span-1">
+                  <label class="custom-input-label">
+                    <input
+                      type="text"
+                      name="first_name"
+                      class="custom-input"
+                      placeholder="نام گیرنده"
+                    />
+                    <span class="custom-input-text">نام گیرنده</span>
+                  </label>
+                </div>
+                <!-- Receiver family -->
+                <div class="col-span-2 sm:col-span-1">
+                  <label class="custom-input-label">
+                    <input
+                      type="text"
+                      name="last_name"
+                      class="custom-input"
+                      placeholder="نام خانوادگی گیرنده"
+                    />
+                    <span class="custom-input-text">نام خانوادگی گیرنده</span>
+                  </label>
+                </div>
+                <!-- Receiver Phone number -->
+                <div class="col-span-2 sm:col-span-1">
+                  <label class="custom-input-label">
+                    <input
+                      type="number"
+                      name="phone"
+                      class="custom-input"
+                      placeholder="شماره تماس گیرنده"
+                    />
+                    <span class="custom-input-text">شماره تماس گیرنده</span>
+                  </label>
+                </div>
+                <!-- Receiver Address -->
+                <div class="col-span-2">
+                  <label class="custom-input-label">
+                    <textarea
+                      name="address"
+                      rows="3"
+                      class="custom-input custom-textarea"
+                      placeholder="نشانی گیرنده"
+                    ></textarea>
+                    <span class="custom-input-text">نشانی گیرنده</span>
+                  </label>
+                </div>
+                <!-- Receiver City -->
+                <div class="col-span-2 sm:col-span-1">
+                  <label class="custom-input-label">
+                    <input
+                      type="text"
+                      name="city"
+                      class="custom-input"
+                      placeholder="شهر"
+                    />
+                    <span class="custom-input-text">شهر</span>
+                  </label>
+                </div>
+                <!-- Receiver Province -->
+                <div class="col-span-2 sm:col-span-1">
+                  <label class="custom-input-label">
+                    <input
+                      type="text"
+                      name="province"
+                      class="custom-input"
+                      placeholder="استان"
+                    />
+                    <span class="custom-input-text">استان</span>
+                  </label>
+                </div>
+                <!-- Receiver Building Info -->
+                <div class="col-span-2 flex w-full items-center gap-x-4 gap-y-5 sm:col-span-1 sm:gap-6">
+                  <label class="custom-input-label flex-1">
+                    <input
+                      type="number"
+                      name="plaque"
+                      class="custom-input"
+                      placeholder="پلاک"
+                    />
+                    <span class="custom-input-text">پلاک</span>
+                  </label>
+                  <label class="custom-input-label flex-1">
+                    <input
+                      type="number"
+                      name="unit"
+                      class="custom-input"
+                      placeholder="واحد"
+                    />
+                    <span class="custom-input-text">واحد</span>
+                  </label>
+                </div>
+                <!-- Receiver Postal Code -->
+                <div class="col-span-2 sm:col-span-1">
+                  <label class="custom-input-label">
+                    <input
+                      type="number"
+                      name="postal_code"
+                      class="custom-input"
+                      placeholder="کد پستی"
+                    />
+                    <span class="custom-input-text">کد پستی</span>
+                  </label>
+                </div>
+              </div>
+              <div class="flex justify-end mt-6">
+                <button class="btn-primary w-full px-4 py-2 md:w-auto" type="submit">
+                  <span>
+                    <svg class="h-5 w-5">
+                      <use xlink:href="#address-add" />
+                    </svg>
+                  </span>
+                  <span> ثبت آدرس جدید </span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <!-- Address Edit modals -->
+      {% for address in addresses %}
+      <div id="address-edit-modal-{{ address.id }}" class="custom-modal hidden">
+        <div class="custom-modal-overlay" onclick="closeModal('address-edit-modal-{{ address.id }}')"></div>
+        <div class="custom-modal-content large">
+          <div class="custom-modal-header">
+            <h3 class="custom-modal-title">ویرایش آدرس</h3>
+            <button type="button" class="custom-modal-close" onclick="closeModal('address-edit-modal-{{ address.id }}')">
+              <svg class="h-5 w-5">
+                <use xlink:href="#close" />
+              </svg>
+            </button>
+          </div>
+          <div class="custom-modal-body">
+            <form method="post" action="{% url 'order:edit-address' address.id %}">
+              <input type="hidden" name="user" value="{{ request.user }}">
+              {% csrf_token %}
+              <div class="grid grid-cols-2 gap-x-4 gap-y-5 sm:gap-6">
+                <!-- Receiver name -->
+                <div class="col-span-2 sm:col-span-1">
+                  <label class="custom-input-label">
+                    <input
+                      type="text"
+                      name="first_name"
+                      class="custom-input"
+                      placeholder="نام گیرنده"
+                      value="{{ address.first_name }}"
+                    />
+                    <span class="custom-input-text">نام گیرنده</span>
+                  </label>
+                </div>
+                <!-- Receiver family -->
+                <div class="col-span-2 sm:col-span-1">
+                  <label class="custom-input-label">
+                    <input
+                      type="text"
+                      name="last_name"
+                      class="custom-input"
+                      placeholder="نام خانوادگی گیرنده"
+                      value="{{ address.last_name }}"
+                    />
+                    <span class="custom-input-text">نام خانوادگی گیرنده</span>
+                  </label>
+                </div>
+                <!-- Receiver Phone number -->
+                <div class="col-span-2 sm:col-span-1">
+                  <label class="custom-input-label">
+                    <input
+                      type="text"
+                      name="phone"
+                      class="custom-input"
+                      placeholder="شماره تماس گیرنده"
+                      value="{{ address.phone }}"
+                    />
+                    <span class="custom-input-text">شماره تماس گیرنده</span>
+                  </label>
+                </div>
+                <!-- Receiver Address -->
+                <div class="col-span-2">
+                  <label class="custom-input-label">
+                    <textarea
+                      name="address"
+                      rows="3"
+                      class="custom-input custom-textarea"
+                      placeholder="نشانی گیرنده"
+                    >{{ address.address }}</textarea>
+                    <span class="custom-input-text">نشانی گیرنده</span>
+                  </label>
+                </div>
+                <!-- Receiver City -->
+                <div class="col-span-2 sm:col-span-1">
+                  <label class="custom-input-label">
+                    <input
+                      type="text"
+                      name="city"
+                      class="custom-input"
+                      placeholder="شهر"
+                      value="{{ address.city }}"
+                    />
+                    <span class="custom-input-text">شهر</span>
+                  </label>
+                </div>
+                <!-- Receiver Province -->
+                <div class="col-span-2 sm:col-span-1">
+                  <label class="custom-input-label">
+                    <input
+                      type="text"
+                      name="province"
+                      class="custom-input"
+                      placeholder="استان"
+                      value="{{ address.province }}"
+                    />
+                    <span class="custom-input-text">استان</span>
+                  </label>
+                </div>
+                <!-- Receiver Building Info -->
+                <div class="col-span-2 flex w-full items-center gap-x-4 gap-y-5 sm:col-span-1 sm:gap-6">
+                  <label class="custom-input-label flex-1">
+                    <input
+                      type="text"
+                      name="plaque"
+                      class="custom-input"
+                      placeholder="پلاک"
+                      value="{{ address.plaque }}"
+                    />
+                    <span class="custom-input-text">پلاک</span>
+                  </label>
+                  <label class="custom-input-label flex-1">
+                    <input
+                      type="text"
+                      name="unit"
+                      class="custom-input"
+                      placeholder="واحد"
+                      value="{{ address.unit }}"
+                    />
+                    <span class="custom-input-text">واحد</span>
+                  </label>
+                </div>
+                <!-- Receiver Postal Code -->
+                <div class="col-span-2 sm:col-span-1">
+                  <label class="custom-input-label">
+                    <input
+                      type="text"
+                      name="postal_code"
+                      class="custom-input"
+                      placeholder="کد پستی"
+                      value="{{ address.postal_code }}"
+                    />
+                    <span class="custom-input-text">کد پستی</span>
+                  </label>
+                </div>
+              </div>
+              <div class="flex justify-end mt-6">
+                <button class="btn-primary w-full px-4 py-2 md:w-auto" type="submit">
+                  <span>
+                    <svg class="h-5 w-5">
+                      <use xlink:href="#address-edit" />
+                    </svg>
+                  </span>
+                  <span> ویرایش آدرس </span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+{% endblock content %}
+{% block extra_css %}
+<style>
+  form[method="post"] input[name="address"],
+  form[method="post"] input[name="shipping"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .custom-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .custom-modal.hidden {
+    display: none;
+  }
+  .custom-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+  }
+  .custom-modal-content {
+    position: relative;
+    background: var(--modal-bg, white);
+    border-radius: 0.75rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    width: 100%;
+    max-width: 28rem;
+    max-height: 90vh;
+    overflow-y: auto;
+    z-index: 1001;
+  }
+  .custom-modal-content.large {
+    max-width: 42rem;
+  }
+  .custom-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--modal-border, #e5e7eb);
+  }
+  .custom-modal-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--modal-text, #1f2937);
+  }
+  .custom-modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.375rem;
+    color: var(--modal-close-color, #6b7280);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .custom-modal-close:hover {
+    color: var(--modal-close-hover-color, #374151);
+    background-color: var(--modal-close-hover-bg, #f3f4f6);
+  }
+  .custom-modal-body {
+    padding: 1.5rem;
+  }
+  .custom-input-label {
+    position: relative;
+    display: block;
+    border-radius: 0.5rem;
+    border: 1px solid var(--input-border, #d1d5db);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    background: var(--input-bg, white);
+  }
+  .custom-input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    outline: none;
+    font-size: 0.875rem;
+    color: var(--input-text, #1f2937);
+  }
+  .custom-textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+  .custom-input:focus {
+    box-shadow: 0 0 0 2px var(--input-focus, #3b82f6);
+  }
+  .custom-input-text {
+    position: absolute;
+    top: 0;
+    right: 0.625rem;
+    padding: 0 0.25rem;
+    background: var(--input-bg, white);
+    font-size: 0.75rem;
+    color: var(--input-label, #6b7280);
+    transform: translateY(-50%);
+    pointer-events: none;
+    transition: all 0.2s;
+  }
+  .dark .custom-modal-content {
+    --modal-bg: #1f2937;
+    --modal-border: #374151;
+    --modal-text: white;
+    --modal-close-color: #9ca3af;
+    --modal-close-hover-color: #d1d5db;
+    --modal-close-hover-bg: #374151;
+  }
+  .dark .custom-input-label {
+    --input-border: #4b5563;
+    --input-bg: #374151;
+    --input-text: white;
+    --input-label: #d1d5db;
+    --input-focus: #60a5fa;
+  }
+  body.modal-open {
+    overflow: hidden;
+  }
+  #toast-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+  .toast {
+    padding: 12px 20px;
+    border-radius: 8px;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 300px;
+    max-width: 500px;
+    animation: slideIn 0.3s ease-out forwards, fadeOut 0.5s ease-in forwards 2.5s;
+  }
+  .toast.error {
+    background-color: #e54545;
+  }
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+  @keyframes fadeOut {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+      display: none;
+    }
+  }
+</style>
+{% endblock extra_css %}
+{% block extra_js %}
+<script>
+  function openModal(modalId) {
+    console.log('Opening modal:', modalId);
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.remove('hidden');
+      document.body.classList.add('modal-open');
+    } else {
+      console.error('Modal not found:', modalId);
+    }
+  }
+  function closeModal(modalId) {
+    console.log('Closing modal:', modalId);
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.add('hidden');
+      document.body.classList.remove('modal-open');
+    }
+  }
+  function toggleDropdown(dropdownId) {
+    const dropdown = document.getElementById(dropdownId);
+    if (dropdown) {
+      dropdown.classList.toggle('hidden');
+    }
+  }
+  document.addEventListener('click', function(event) {
+    if (event.target.classList.contains('custom-modal-overlay')) {
+      const modal = event.target.closest('.custom-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+      }
+    }
+  });
+  document.addEventListener('click', function(event) {
+    const dropdowns = document.querySelectorAll('[id^="address-option-"]');
+    dropdowns.forEach(dropdown => {
+      if (!dropdown.contains(event.target) &&
+          !event.target.closest('[onclick*="toggleDropdown"]')) {
+        dropdown.classList.add('hidden');
+      }
+    });
+  });
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+      const openModals = document.querySelectorAll('.custom-modal:not(.hidden)');
+      openModals.forEach(modal => {
+        modal.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+      });
+    }
+  });
+  document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('.custom-input');
+    inputs.forEach(input => {
+      if (input.value) {
+        input.parentElement.classList.add('has-value');
+      }
+      input.addEventListener('input', function() {
+        if (this.value) {
+          this.parentElement.classList.add('has-value');
+        } else {
+          this.parentElement.classList.remove('has-value');
+        }
+      });
+      input.addEventListener('focus', function() {
+        this.parentElement.classList.add('focused');
+      });
+      input.addEventListener('blur', function() {
+        this.parentElement.classList.remove('focused');
+      });
+    });
+    document.querySelectorAll('input[name="address"]').forEach(radio => {
+      radio.addEventListener('change', function() {
+        console.log('Selected address:', this.value);
+      });
+    });
+    document.querySelectorAll('input[name="shipping_method"]').forEach(radio => {
+      radio.addEventListener('change', function() {
+        console.log('Selected shipping:', this.value);
+      });
+    });
+    document.querySelectorAll('.custom-modal').forEach(modal => {
+      modal.classList.add('hidden');
+    });
+    console.log('Modal system initialized successfully');
+  });
+
+  function showToast(message, type = 'error') {
+    const toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+      const container = document.createElement('div');
+      container.id = 'toast-container';
+      document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+
+    document.getElementById('toast-container').appendChild(toast);
+
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }
+
+  function formatPrice(price) {
+    if (typeof price === 'string') {
+      return price;
+    }
+    return parseFloat(price).toLocaleString('fa-IR');
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const shippingRadios = document.querySelectorAll('input[name="shipping_method"]');
+    shippingRadios.forEach(radio => {
+      radio.addEventListener('change', function() {
+        const shippingMethodId = this.value;
+        if (!shippingMethodId) return;
+
+        shippingRadios.forEach(r => {
+          if (r !== this) r.disabled = true;
+        });
+
+        const formData = new FormData();
+        formData.append('shipping_method_id', shippingMethodId);
+        const csrfTokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfTokenInput) {
+          formData.append('csrfmiddlewaretoken', csrfTokenInput.value);
+        }
+
+        fetch('{% url "order:apply-shipping-method" %}', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          shippingRadios.forEach(r => {
+            r.disabled = false;
+          });
+
+          if (data.status === 'success') {
+            document.querySelector('#total-amount-without-discount').textContent = formatPrice(data.total_amount_without_discount);
+            document.querySelector('#total-amount-discounts').textContent = formatPrice(data.total_amount_discounts);
+            document.querySelector('#shipping-cost').textContent = formatPrice(data.price_shipping_method);
+            document.querySelector('#total-payment-amount').textContent = formatPrice(data.total_payment_amount);
+            document.querySelector('#mobile-total-payment-amount').textContent = formatPrice(data.total_payment_amount);
+          } else if (data.status === 'error') {
+            showToast(data.message || 'خطایی رخ داده است. لطفاً دوباره تلاش کنید.', 'error');
+          } else {
+            showToast('پاسخ نامشخص از سرور دریافت شد.', 'error');
+          }
+        })
+        .catch(error => {
+          shippingRadios.forEach(r => {
+            r.disabled = false;
+          });
+          console.error('Error applying shipping method:', error);
+          showToast('خطا در برقراری ارتباط با سرور. لطفاً دوباره تلاش کنید.', 'error');
+        });
+      });
+    });
+  });
+</script>
+{% endblock extra_js %}

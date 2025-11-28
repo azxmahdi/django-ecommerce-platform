@@ -1,0 +1,37 @@
+{% load jalali_tags %}
+
+
+<div
+  class="mb-8 rounded-lg bg-muted px-2 py-3 shadow-base xl:px-4"
+>
+  <p class="mb-4 text-center text-sm font-medium xl:text-base">
+    مطالب محبوب
+  </p>
+  <ul class="space-y-8">
+    {% for post in posts %}
+    <li>
+      <a href="{% url 'blog:post-detail' slug=post.slug %}">
+        <div class="flex gap-x-2 xl:gap-x-4">
+          <div class="min-w-fit">
+            <img
+              src="{{ post.image.url }}"
+              alt="blog"
+              class="w-25 rounded-xl xl:w-32"
+            />
+          </div>
+          <div class="flex flex-col gap-y-2">
+            <p
+              class="line-clamp-2 text-sm text-text/90 xl:text-base"
+            >
+              {{ post.name }}
+            </p>
+            <p class="text-xs text-text/60 xl:text-sm">
+                {{ post.published_date|jalali_date }}
+            </p>
+          </div>
+        </div>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+</div>

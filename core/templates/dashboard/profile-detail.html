@@ -1,0 +1,486 @@
+{% extends "bases/base_dashboard.html" %}
+{% block title %} پروفایل {% endblock title %}
+
+{% block dashboard_content %}
+
+            <!-- content -->
+            <div class="col-span-12 lg:col-span-9">
+              <div class="rounded-lg bg-muted p-5 shadow-base">
+                <!-- Title -->
+                <h1 class="relative mb-16 w-fit text-xl font-medium">
+                  اطلاعات حساب کاربری شما
+                  <span
+                    class="absolute right-0 top-10 h-[3px] w-full rounded-full bg-primary"
+                  >
+                  </span>
+                </h1>
+                <!-- Content -->
+                <div class="grid grid-cols-2 gap-4">
+                  <!-- full name -->
+                  <div class="col-span-2 sm:col-span-1">
+                    <button
+                      class="w-full"
+                      type="button"
+                      data-modal-target="fullname-modal"
+                      data-modal-toggle="fullname-modal"
+                    >
+                      <div
+                        class="relative rounded-lg border p-4 hover:border-border/50"
+                      >
+                        <div class="flex justify-between">
+                          <div class="flex flex-col items-start gap-y-2">
+                            <div class="text-text/90">نام و نام خانوادگی</div>
+                            <div class="mr-2 text-text/60">{{ user.user_profile.full_name|default:"-" }}</div>
+                          </div>
+                          <svg class="h-6 w-6 text-primary">
+                            <use xlink:href="#edit" />
+                          </svg>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+
+                  <!-- phone number  -->
+                  <div class="col-span-2 sm:col-span-1">
+                    <button
+                      class="w-full"
+                      type="button"
+                      data-modal-target="phoneNumber-modal"
+                      data-modal-toggle="phoneNumber-modal"
+                    >
+                      <div
+                        class="relative rounded-lg border p-4 hover:border-border/50"
+                      >
+                        {% comment %} <div
+                          class="absolute inset-x-0 -bottom-2.5 mx-auto w-fit rounded-full bg-muted px-3 text-sm font-medium text-primary"
+                        >
+                          تایید شده
+                        </div> {% endcomment %}
+                        <div class="flex justify-between">
+                          <div class="flex flex-col items-start gap-y-2">
+                            <div class="text-text/90">شماره موبایل</div>
+
+                            <div class="mr-2 text-text/60">{{ user.phone }}</div>
+                          </div>
+                          <svg class="h-6 w-6 text-primary">
+                            <use xlink:href="#edit" />
+                          </svg>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+
+                  <!-- password   -->
+                  <div class="col-span-2 sm:col-span-1">
+                    <button
+                      class="w-full"
+                      type="button"
+                      data-modal-target="password-modal"
+                      data-modal-toggle="password-modal"
+                    >
+                      <div
+                        class="relative rounded-lg border p-4 hover:border-border/50"
+                      >
+                        <div class="flex justify-between">
+                          <div class="flex flex-col items-start gap-y-2">
+                            <div class="text-text/90">کلمه عبور</div>
+
+                            <div class="mr-2 select-none text-text/60">
+                              <input
+                                type="password"
+                                value="••••••••"
+                                class="select-none bg-transparent"
+                                disabled
+                              />
+                            </div>
+                          </div>
+                          <svg class="h-6 w-6 text-primary">
+                            <use xlink:href="#edit" />
+                          </svg>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+            </div> 
+          </div>
+        </div>
+      </main>
+
+
+      <!-- Full name modal -->
+      <div
+        id="fullname-modal"
+        tabindex="-1"
+        aria-hidden="true"
+        class="main-scroll fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full overflow-y-auto overflow-x-hidden p-4 md:inset-0"
+      >
+        <div class="relative max-h-full w-full max-w-2xl">
+          <div
+            class="divide-y overflow-hidden rounded-lg bg-muted shadow-sm ring-1 ring-gray-100 dark:ring-white/5"
+          >
+            <div class="px-4 py-5 sm:px-6">
+              <div class="flex items-center justify-between">
+                <h3 class="md:text-lg">تغییر نام و نام خانوادگی</h3>
+
+                <button
+                  class=" "
+                  data-modal-hide="fullname-modal"
+                  type="button"
+                >
+                  <svg class="h-5 w-5">
+                    <use xlink:href="#close"></use>
+                  </svg>
+
+                  <span class="sr-only">Close Modal</span>
+                </button>
+              </div>
+            </div>
+            <div class="space-y-6 px-4 py-5 sm:p-6">
+              <form id="fullname-form" method="post" action="{% url 'dashboard:firstname-and-lastname-edit' %}">
+                  {% csrf_token %}
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="col-span-2 sm:col-span-1">
+                    <label
+                      for="first_name"
+                      class="relative block rounded-lg border shadow-base"
+                    >
+                      <input
+                        type="text"
+                        name="first_name"
+                        id="first_name"
+                        value="{{ user.user_profile.first_name|default:'' }}"
+                        class="peer w-full rounded-lg border-none bg-transparent px-4 py-3 placeholder-transparent focus:outline-hidden focus:ring-0"
+                        placeholder="نام "
+                      />
+
+                      <span
+                        class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-muted px-2 py-0.5 text-sm text-text/60 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-focus:top-0 peer-focus:text-sm"
+                      >
+                        نام
+                      </span>
+                    </label>
+                    <div class="my-2 h-6 text-red-500 dark:text-red-400" id="first_name_error"></div>
+                  </div>
+                  <div class="col-span-2 sm:col-span-1">
+                    <label
+                      for="last_name"
+                      class="relative block rounded-lg border shadow-base"
+                    >
+                      <input
+                        type="text"
+                        name="last_name"
+                        id="last_name"
+                        value="{{ user.user_profile.last_name|default:'' }}"
+                        class="peer w-full rounded-lg border-none bg-transparent px-4 py-3 placeholder-transparent focus:outline-hidden focus:ring-0"
+                        placeholder="نام خانوادگی"
+                      />
+
+                      <span
+                        class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-muted px-2 py-0.5 text-sm text-text/60 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-focus:top-0 peer-focus:text-sm"
+                      >
+                        نام خانوادگی
+                      </span>
+                    </label>
+                    <div class="my-2 h-6 text-red-500 dark:text-red-400" id="last_name_error"></div>
+                  </div>
+                </div>
+                <div class="flex items-center justify-end gap-x-4">
+                  <button
+                    class="btn-primary w-full px-4 py-2 xs:w-24"
+                    type="submit"
+                  >
+                    ویرایش
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- phone number modal -->
+      <div
+        id="phoneNumber-modal"
+        tabindex="-1"
+        aria-hidden="true"
+        class="main-scroll fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full overflow-y-auto overflow-x-hidden p-4 md:inset-0"
+      >
+        <div class="relative max-h-full w-full max-w-md">
+          <div
+            class="divide-y overflow-hidden rounded-lg bg-muted shadow-sm ring-1 ring-gray-100 dark:ring-white/5"
+          >
+            <div class="px-4 py-5 sm:px-6">
+              <div class="flex items-center justify-between">
+                <h3 class="md:text-lg">تغییر شماره موبایل</h3>
+
+                <button
+                  class=" "
+                  data-modal-hide="phoneNumber-modal"
+                  type="button"
+                >
+                  <svg class="h-5 w-5">
+                    <use xlink:href="#close"></use>
+                  </svg>
+
+                  <span class="sr-only">Close Modal</span>
+                </button>
+              </div>
+            </div>
+            <div class="space-y-6 px-4 py-5 sm:p-6">
+              <form id="phone-form" method="post" action="{% url 'dashboard:phone-edit' %}">
+                  {% csrf_token %}
+                <div>
+                  <label
+                    for="new_phone"
+                    class="relative block rounded-lg border shadow-base"
+                  >
+                    <input
+                      type="text"
+                      name="phone" 
+                      id="new_phone"
+                      dir="auto"
+                      class="peer w-full rounded-lg border-none bg-transparent px-4 py-3 text-left placeholder-transparent focus:outline-hidden focus:ring-0"
+                      placeholder="شماره موبایل جدید"
+                    />
+
+                    <span
+                      class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-muted px-2 py-0.5 text-sm text-text/60 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-focus:top-0 peer-focus:text-sm"
+                    >
+                      شماره موبایل جدید
+                    </span>
+                  </label>
+                  <div class="my-2 h-6 text-red-500 dark:text-red-400" id="new_phone_error"></div>
+                </div>
+                <div class="flex items-center justify-end gap-x-4">
+                  <button
+                    class="btn-primary w-full px-4 py-2 xs:w-fit"
+                    type="submit"
+                  >
+                    ارسال کد تایید
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- password modal -->
+      <div
+        id="password-modal"
+        tabindex="-1"
+        aria-hidden="true"
+        class="main-scroll fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full overflow-y-auto overflow-x-hidden p-4 md:inset-0"
+      >
+        <div class="relative max-h-full w-full max-w-lg">
+          <div
+            class="divide-y overflow-hidden rounded-lg bg-muted shadow-sm ring-1 ring-gray-100 dark:ring-white/5"
+          >
+            <div class="px-4 py-5 sm:px-6">
+              <div class="flex items-center justify-between">
+                <h3 class="md:text-lg">تغییر رمز عبور</h3>
+
+                <button
+                  class=" "
+                  data-modal-hide="password-modal"
+                  type="button"
+                >
+                  <svg class="h-5 w-5">
+                    <use xlink:href="#close"></use>
+                  </svg>
+
+                  <span class="sr-only">Close Modal</span>
+                </button>
+              </div>
+            </div>
+            <div class="space-y-6 px-4 py-5 sm:p-6">
+              <form id="password-form" method="post" action="{% url 'dashboard:password-edit' %}">
+                  {% csrf_token %}
+                <div class="mb-4">
+                  <div>
+                    <label
+                      for="currentPassword"
+                      class="relative block rounded-lg border shadow-base"
+                    >
+                      <input
+                        type="password"
+                        name="old_password"
+                        id="currentPassword"
+                        class="peer w-full rounded-lg border-none bg-transparent px-4 py-3 placeholder-transparent focus:outline-hidden focus:ring-0"
+                        placeholder="کلمه عبور فعلی"
+                      />
+
+                      <span
+                        class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-muted px-2 py-0.5 text-sm text-text/60 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-focus:top-0 peer-focus:text-sm"
+                      >
+                        کلمه عبور فعلی
+                      </span>
+                    </label>
+                    <div
+                      class="my-2 h-6 text-red-500 dark:text-red-400"
+                      id="old_password_error"
+                    ></div>
+                  </div>
+                </div>
+                <div class="mb-4">
+                  <div>
+                    <label
+                      for="password"
+                      class="relative block rounded-lg border shadow-base"
+                    >
+                      <input
+                        type="password"
+                        name="new_password"
+                        id="password"
+                        class="peer w-full rounded-lg border-none bg-transparent px-4 py-3 placeholder-transparent focus:outline-hidden focus:ring-0"
+                        placeholder="کلمه عبور جدید"
+                      />
+
+                      <span
+                        class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-muted px-2 py-0.5 text-sm text-text/60 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-focus:top-0 peer-focus:text-sm"
+                      >
+                        کلمه عبور جدید
+                      </span>
+                    </label>
+                    <div
+                      class="my-2 h-6 text-red-500 dark:text-red-400"
+                      id="new_password_error"
+                    ></div>
+                  </div>
+                  <div>
+                    <div class="mb-4 flex items-center gap-x-2">
+                      <div
+                        class="h-[3px] w-full rounded-full bg-background dark:bg-zinc-800"
+                      ></div>
+                      <div
+                        class="h-[3px] w-full rounded-full bg-background dark:bg-zinc-800"
+                      ></div>
+                      <div
+                        class="h-[3px] w-full rounded-full bg-background dark:bg-zinc-800"
+                      ></div>
+                      <div
+                        class="h-[3px] w-full rounded-full bg-background dark:bg-zinc-800"
+                      ></div>
+                    </div>
+                    <div>
+                      <ul
+                        class="select-none list-disc space-y-2 px-4 text-xs text-slate-500 dark:text-slate-400 md:text-sm"
+                      >
+                        <li>
+                          <p>حداقل 8 کاراکتر</p>
+                        </li>
+                        <li>
+                          <p>شامل عدد</p>
+                        </li>
+                        <li>
+                          <p>شامل یک حرف بزرگ</p>
+                        </li>
+                        <li>
+                          <p>شامل یک حرف کوچک</p>
+                        </li>
+                        <li>
+                          <p>شامل یک نماد خاص</p>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                <div class="mb-4">
+                  <div>
+                    <label
+                      for="confirmPassword"
+                      class="relative block rounded-lg border shadow-base"
+                    >
+                      <input
+                        type="password"
+                        name="confirm_password"
+                        id="confirmPassword"
+                        class="peer w-full rounded-lg border-none bg-transparent px-4 py-3 placeholder-transparent focus:outline-hidden focus:ring-0"
+                        placeholder="تکرار کلمه عبور جدید"
+                      />
+
+                      <span
+                        class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-muted px-2 py-0.5 text-sm text-text/60 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-base peer-focus:top-0 peer-focus:text-sm"
+                      >
+                        تکرار کلمه عبور جدید
+                      </span>
+                    </label>
+                    <div
+                      class="my-2 h-6 text-red-500 dark:text-red-400"
+                      id="confirm_password_error"
+                    ></div>
+                  </div>
+                </div>
+                </form>
+            </div>
+            <div class="flex items-center justify-end gap-x-4">
+              <button
+                class="btn-primary w-full px-4 py-2 xs:w-fit"
+                type="submit"
+                form="password-form"
+              >
+                تغییر کلمه عبور
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div> 
+{% endblock dashboard_content %}
+
+{% block extra_css %}
+<style>
+#fullname-form .error,
+#password-form .error,
+#phone-form .error {
+  color: #dc2626; 
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+</style>
+{% endblock extra_css %}
+
+{% block extra_js %}
+<script>
+function clearErrors(formId) {
+    const errorElements = document.querySelectorAll(`#${formId} [id$='_error']`);
+    errorElements.forEach(el => {
+        el.textContent = '';
+    });
+}
+
+function showErrors(errors) {
+    for (const [field, messages] of Object.entries(errors)) {
+        const errorDiv = document.getElementById(`${field}_error`);
+        if (errorDiv) {
+            errorDiv.textContent = messages.join(' ');
+        }
+    }
+}
+
+document.getElementById('fullname-form').addEventListener('submit', function(e) {
+    clearErrors('fullname-form');
+});
+
+document.getElementById('password-form').addEventListener('submit', function(e) {
+    const newPassword = e.target.querySelector('input[name="new_password"]').value;
+    const confirmPassword = e.target.querySelector('input[name="confirm_password"]').value;
+    const errorDiv = document.getElementById('confirm_password_error');
+
+    if (newPassword !== confirmPassword) {
+        e.preventDefault(); 
+        errorDiv.textContent = 'تکرار رمز عبور مطابقت ندارد.';
+    } else {
+        clearErrors('password-form');
+        errorDiv.textContent = ''; 
+    }
+});
+
+document.getElementById('phone-form').addEventListener('submit', function(e) {
+    clearErrors('phone-form');
+});
+
+</script>
+{% endblock extra_js %}

@@ -1,0 +1,135 @@
+{% extends "bases/base_with_cart_icon.html" %}
+{% load static website_inclusion_tags %}
+
+{% block title %} صفحه اصلی {% endblock title %}
+
+{% block extra_css %}
+<style>
+  .promo-image {
+    width: 344px;            
+    height: 126px;
+    max-width: 100%;          
+    aspect-ratio: 172 / 63;  
+    object-fit: cover;         
+    display: block;
+    margin: 0 auto;
+    border-radius: 8px;        
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); 
+    transition: transform 0.3s ease; 
+  }
+
+  .promo-image:hover {
+    transform: scale(1.03);    
+  }
+</style>
+
+{% endblock extra_css %}
+
+{% block content %}
+        <!-- Main Banners section Start -->
+        <section class="mb-8">
+          <div class="container relative grid grid-cols-12 gap-x-4 gap-y-2">
+            <div class="col-span-12 lg:col-span-8">
+              <!-- Swiper -->
+              <div class="swiper banner-slider rounded-lg shadow-base">
+                <div class="swiper-wrapper">
+                  {% for main_banner in main_banners %}
+                  <div class="swiper-slide">
+                    <a href="{{ main_banner.get_target_url }}">
+                      <img
+                        alt=""
+                        class="max-h-[450px]"
+                        src="{{ main_banner.file.url }}"
+                      />
+                    </a>
+                  </div>
+                  {% endfor %}
+                  
+                </div>
+                <div class="swiper-button-next hidden md:flex"></div>
+                <div class="swiper-button-prev hidden md:flex"></div>
+                <div class="swiper-pagination main-banner-pagination"></div>
+              </div>
+            </div>
+            <div class="col-span-12 hidden xs:block lg:col-span-4">
+              <div
+                class="flex h-full flex-row justify-between gap-x-2 lg:flex-col"
+              >
+                {% for small_banner in small_banners %}
+                <div>
+                  <a href="{{ small_banner.get_target_url }}">
+                    <img
+                      alt=""
+                      class="rounded-lg shadow-base"
+                      src="{{ small_banner.file.url }}"
+                    />
+                  </a>
+                </div>
+                {% endfor %}
+                
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- Main Banners section End -->
+
+        <!-- Newest Products section Start -->
+
+        {% newest_products %}
+
+
+        <!-- Newest Products section End -->
+
+        <!-- Category Banners section Start -->
+              
+        <section class="mb-8">
+          <div class="container relative">
+            <div class="flex w-full flex-col justify-between gap-4 md:flex-row">
+              {% for sidebar_banner in sidebar_banners %}
+              <a href="{{ sidebar_banner.get_target_url }}">
+                <img
+                  alt=""
+                  class="promo-image rounded-base"
+                  src="{{ sidebar_banner.file.url }}"
+                />
+              </a>
+              {% endfor %}
+            </div>
+          </div>
+        </section>
+
+        <!-- Category Banners section End -->
+
+        <!-- Category section Start -->
+        
+        <section class="mb-8">
+          <div class="container relative">
+            <div class="flex flex-wrap items-center justify-center gap-8 lg:justify-between">
+
+                {% for category_banner in category_banners %}
+                <a class="relative flex w-25 flex-col items-center justify-between gap-y-1.5 sm:w-auto sm:gap-y-2.5"
+                  href="{{ category_banner.get_target_url }}">
+                  <div class="border-gradient group relative rounded-full p-px before:absolute before:-inset-px before:h-[calc(100%+2px)] before:w-[calc(100%+2px)] before:rounded-full">
+                    <img alt="" class="relative h-25 w-25 rounded-full"
+                        src="{{ category_banner.file.url }}" />
+                  </div>
+                  <p class="line-clamp-2 h-10 text-center text-sm sm:text-base">{{ category_banner.title }}</p>
+                </a>
+                {% endfor %}
+
+            
+            </div>
+          </div>
+        </section>
+
+        <!-- Category section End -->
+
+        <!-- Special Products section Start -->
+        {% best_selling_products %}
+        <!-- Special Products section End -->
+
+        <!-- Blog section Start -->
+        {% posts %}
+
+        <!-- Blog section End -->
+        {% endblock content %}

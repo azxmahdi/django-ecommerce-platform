@@ -1,0 +1,23 @@
+FROM python:3.8-slim-buster
+
+LABEL maintainer="azxmahdi22@gmail.com"
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /usr/src/app
+
+COPY requirements.txt .
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
+COPY ./core .
+
+# Copy entrypoint script
+# Dockerfile
+COPY ./dockerfiles/prod/django/entrypoint.sh /usr/local/bin/entrypoint.sh
+
+# Give execute permission to the entrypoint script
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Set entrypoint to the script
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

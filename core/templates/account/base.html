@@ -1,0 +1,31 @@
+{% load static %}
+<!doctype html>
+<html dir="rtl" lang="fa">
+  <head>
+    <meta charset="UTF-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>{% block title %} {% endblock title %}</title>
+
+    <link href=" {% static 'assets/css/fonts.css' %}" rel="stylesheet" />
+    <link href=" {% static 'assets/css/app.css' %}" rel="stylesheet" />
+    <link href=" {% static 'assets/css/theme.css' %}" rel="stylesheet" />
+
+    <link href=" {% static 'assets/toastify/toastify.css' %}" rel="stylesheet" />
+
+    {% block extra_css %} {% endblock extra_css %}
+
+    <script src=" {% static 'assets/scripts/mount.js' %}"></script>
+
+
+    <script src=" {% static 'assets/toastify/toastify.js' %}"></script>
+    <script src=" {% static 'assets/toastify/toastify-es.js' %}"></script>
+
+    {% include "messages.html" %}
+
+    {% block extra_js %} {% endblock %}
+  </head>
+
+  <body>
+    {% block content %} {% endblock content %} {% include 'messages.html' %}
+  </body>
+</html>

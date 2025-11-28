@@ -1,0 +1,82 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: db
+    restart: always
+    environment:
+      POSTGRES_DB: name 
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    expose:
+      - 5232
+    volumes:
+      - ./postgres/data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+
+  redis:
+    container_name: redis
+    image: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+
+  backend:
+    build:
+      context: .
+      dockerfile: ./dockerfiles/dev/django/DockerFile
+    env_file:
+      - ./envs/dev/django/.env
+    working_dir: /usr/src/app
+    command: python manage.py runserver 0.0.0.0:8000
+    container_name: backend
+    volumes:
+      - ./core:/usr/src/app
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+      - redis
+    
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: ./dockerfiles/dev/django/DockerFile
+    env_file:
+      - ./envs/dev/django/.env
+    command: celery -A core worker --loglevel=info 
+    volumes:
+      - ./core:/app
+    depends_on:
+      - backend
+      - redis
+
+
+    
+  celery_beat:
+    build:
+      context: .
+      dockerfile: ./dockerfiles/dev/django/DockerFile
+    env_file:
+      - ./envs/dev/django/.env
+    command: celery -A core beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - ./core:/app
+    depends_on:
+      - backend
+      - redis
+

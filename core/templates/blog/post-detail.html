@@ -1,0 +1,209 @@
+{% extends "bases/base_with_cart_icon.html" %}
+{% load jalali_tags blog_inclusion_tags %}
+
+{% block title %} جزئیات مطلب {% endblock title %}
+
+{% block content %}
+        <div class="container relative">
+          <div class="mb-6 hidden md:block">
+            <nav
+              aria-label="Breadcrumb"
+              class="w-fit rounded-lg bg-muted px-4 py-4 shadow-base"
+            >
+              <ol
+                class="flex flex-wrap items-center justify-center gap-x-2 gap-y-4"
+              >
+                <li class="flex items-center gap-x-2">
+                  <a
+                    href="{% url 'website:index' %}"
+                    class="text-sm text-text/90 hover: hover:"
+                  >
+                    روتی کالا
+                  </a>
+                  <span class="text-text/90">
+                    <svg class="h-5 w-5">
+                      <use xlink:href="#chevron-left"></use>
+                    </svg>
+                  </span>
+                </li>
+                <li class="flex items-center gap-x-2">
+                  <a href="{% url 'blog:post-list' %}" class="text-sm text-text/90 hover: hover:">
+                    وبلاگ
+                  </a>
+                  <span class="text-text/90">
+                    <svg class="h-5 w-5">
+                      <use xlink:href="#chevron-left"></use>
+                    </svg>
+                  </span>
+                </li>
+
+                <li>
+                  <p class="text-sm text-text/90 hover: hover:">{{ post.name }}</p>
+                </li>
+              </ol>
+            </nav>
+          </div>
+          <div class="mb-4 flex flex-wrap items-center gap-2 md:hidden">
+            <div
+              class="flex items-center gap-x-1 text-sm font-light text-primary sm:text-base md:text-base"
+            >
+              <a href="{% url 'website:index' %}"> روتی کالا </a>
+              <svg class="h-5 w-5">
+                <use xlink:href="#chevron-left"></use>
+              </svg>
+            </div>
+            <div
+              class="flex items-center gap-x-1 text-sm font-light text-primary sm:text-base md:text-base"
+            >
+              <a href="{% url 'blog:post-list' %}"> وبلاگ </a>
+              <svg class="h-5 w-5">
+                <use xlink:href="#chevron-left"></use>
+              </svg>
+            </div>
+            <div
+              class="line-clamp-1 text-sm font-light text-primary sm:text-base md:text-base"
+            >
+            {{ post.title }}
+            </div>
+          </div>
+          <div class="grid grid-cols-12 grid-rows-[60px_min(500px,1fr)] gap-4">
+            <div class="col-span-12 space-y-4 md:col-span-8 lg:col-span-9">
+              <div class="rounded-lg bg-muted p-3 shadow-base md:p-5">
+                <h1 class="mb-8 font-medium md:text-xl">
+                  {{ post.title }}
+                </h1>
+
+                <div
+                  class="mb-8 flex flex-col items-center justify-between gap-4 xs:flex-row"
+                >
+                  <div class="flex items-center gap-x-2 text-sm text-text/90">
+                    <div class="flex items-center gap-x-2">
+                      <svg class="h-5 w-5">
+                        <use xlink:href="#user" />
+                      </svg>
+                      <p class="font-medium">{{ post.author.full_name }}</p>
+                    </div>
+                    <div class="h-3 w-px rounded-full bg-background"></div>
+                    <div>{{ post.published_date|jalali_date }}</div>
+                  </div>
+                  <div>
+                    <button
+                      id="dropdownMenuCopySocialShareLink"
+                      data-dropdown-toggle="copy-social-share-link"
+                      data-tooltip-target="share-on-social"
+                      type="button"
+                      class="btn-primary-nobg"
+                    >
+                      <svg class="h-5 w-5">
+                        <use xlink:href="#social-share" />
+                      </svg>
+                      اشتراک گذاری
+                    </button>
+                    <!-- Dropdown menu -->
+                    <div
+                      class="z-10 ml-5! hidden w-50 overflow-hidden rounded-lg border bg-muted shadow-base"
+                      id="copy-social-share-link"
+                    >
+                      <ul class="space-y-2 p-2">
+                        <li>
+                          <button
+                            type="button"
+                            data-link="{{ absolute_url }}"
+                            onclick="copyToClipboardSocialShareDesktop(this)"
+                            class="flex w-full items-center justify-between rounded-lg px-4 py-3 text-sky-500 hover:bg-sky-500/10 dark:text-sky-400 dark:hover:bg-sky-400/10"
+                          >
+                            <div class="flex items-center gap-x-2">
+                              <svg class="h-6 w-6">
+                                <use xlink:href="#copy"></use>
+                              </svg>
+                              <span id="copyToClipboardSocialShareText">
+                                کپی کردن لینک
+                              </span>
+                            </div>
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                <div class="mb-8">
+                  <img
+                    src="{{ post.image.url }}"
+                    alt="blog"
+                    class="w-full rounded-xl"
+                  />
+                </div>
+                <div class="leading-loose text-text/90">
+                  <p class="mb-6">
+                    {{ post.content|safe }}
+                  </p>
+                  
+                </div>
+              </div>
+            </div>
+            <!-- Desktop Filter Section -->
+            <div class="col-span-4 row-span-2 hidden md:block lg:col-span-3">
+              <div class="sticky top-32 mb-4 overflow-hidden">
+
+              {% related_posts post.category.all exclude_id=post.id limit=4 %}
+                
+
+              {% popular_posts exclude_id=post.pk limit=3 %}
+              
+
+              {% categories %}
+              
+              
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endblock content %}
+      
+    {% block extra_js %}
+    <script>
+      const copyToClipboardSocialShareDesktop = (button) => {
+        const linkToCopy = button.getAttribute("data-link");
+        if (linkToCopy) {
+          navigator.clipboard
+            .writeText(linkToCopy)
+            .then(function () {
+              const copyToClipboardSocialShareText = document.getElementById(
+                "copyToClipboardSocialShareText",
+              );
+              copyToClipboardSocialShareText.innerText = "کپی شد !";
+
+              setTimeout(function () {
+                copyToClipboardSocialShareText.innerText = "کپی کردن لینک";
+              }, 5000);
+            })
+            .catch(function (err) {
+              console.error("مشکلی در عملیات پیش آمد", err);
+            });
+        }
+      };
+      const copyToClipboardSocialShareMobile = (button) => {
+        const linkToCopy = button.getAttribute("data-link");
+        console.log(linkToCopy);
+        if (linkToCopy) {
+          navigator.clipboard
+            .writeText(linkToCopy)
+            .then(function () {
+              const copyToClipboardSocialShareNotifyMobile =
+                document.getElementById(
+                  "notify-copied-social-share-link-mobile",
+                );
+              copyToClipboardSocialShareNotifyMobile.classList.remove("hidden");
+
+              setTimeout(function () {
+                copyToClipboardSocialShareNotifyMobile.classList.add("hidden");
+              }, 5000);
+            })
+            .catch(function (err) {
+              console.error("مشکلی در عملیات پیش آمد", err);
+            });
+        }
+      };
+    </script>
+
+{% endblock extra_js %}

@@ -1,0 +1,360 @@
+{% extends "bases/base.html" %}
+{% load price_filters %}
+
+{% block extra_navbar_desktop %}
+<!-- Basket -->
+<div>
+    <button
+      class="group relative"
+      data-dropdown-toggle="dropdownBasketDesktop"
+      type="button"
+    >
+      <span class="cursor-pointer">
+        <svg class="h-6 w-6">
+          <use xlink:href="#cart" />
+        </svg>
+      </span>
+      <span
+        class="absolute -right-2.5 -top-2.5 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-primary-btn text-sm font-bold text-white"
+        id="mini-cart-count"
+      >
+        {{ cart.total_quantity }}
+      </span>
+    </button>
+
+    <div
+      class="z-10 ml-5! hidden w-[400px] overflow-hidden rounded-lg border-t-2 border-t-primary bg-muted"
+      id="dropdownBasketDesktop"
+    >
+      <!-- Head -->
+      <div class="flex items-center justify-between p-5 pb-2">
+        <div class="text-sm text-text/90" id="mini-cart-items-count">{{ cart.cart_items.values|length }} مورد</div>
+        <a
+          class="flex items-center gap-x-1 text-sm text-primary"
+          href="{% url "cart:checkout" %}"
+        >
+          <div>مشاهده سبد خرید</div>
+          <div>
+            <svg class="h-5 w-5">
+              <use xlink:href="#chevron-left" />
+            </svg>
+          </div>
+        </a>
+      </div>
+      <!-- Items -->
+      <div class="h-60">
+        <ul
+          class="main-scroll h-full space-y-2 divide-y overflow-y-auto p-5 pl-2"
+          id="mini-cart-items-container"
+        >
+          {% for cart_item in cart.cart_items.values %}
+          <li class="cart-item" data-variant-id="{{ cart_item.variant_obj.id }}">
+            <div class="flex gap-x-2 py-5">
+              <!-- Product Image -->
+
+              <div class="relative min-w-fit">
+                <a href="./product-detail.html">
+                  <img
+                    alt="{{ cart_item.variant_obj.product.name }}"
+                    class="h-[120px] w-[120px]"
+                    loading="lazy"
+                    src="{{ cart_item.variant_obj.product.image.url }}"
+                  />
+                </a>
+
+                <button
+                  class="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-background remove-product-btn"
+                  type="button"
+                  title="حذف"
+                >
+                  <svg class="h-6 w-6 text-red-600 dark:text-red-500">
+                    <use xlink:href="#close"></use>
+                  </svg>
+                </button>
+              </div>
+
+              <div class="w-full space-y-1.5">
+                <!-- Product Title -->
+
+                <a
+                  class="line-clamp-2 h-12"
+                  href="./product-detail.html"
+                >
+                {{ cart_item.variant_obj.product.name }}
+                </a>
+                <!-- Product Attribute -->
+                <div
+                  class="flex items-center gap-x-2 text-sm text-text/60"
+                >
+                  <div
+                    class="h-3 w-px rounded-full bg-background"
+                  ></div>
+                  <div class="flex items-center gap-x-2">
+                    
+                    <span> {{ cart_item.variant_obj.attribute_value.value }}</span>
+                  </div>
+                </div>
+                <div
+                  class="flex items-center justify-between gap-x-2"
+                >
+                  <!-- Product Price -->
+                  <div class="text-primary">
+                    <span class="text-lg font-bold item-total-price"
+                      >{{ cart_item.total_price_with_discount|format_price }} </span
+                    >
+                    <span class="text-sm">تومان</span>
+                  </div>
+                  <!-- Product Quantity -->
+                  <div
+                    class="flex h-10 w-24 items-center justify-between rounded-lg border px-2 py-1 quantity-container"
+                    data-max-stock="{{ cart_item.variant_obj.stock }}"
+                  >
+                  <button
+                    type="button"
+                    class="increment-btn {% if cart_item.quantity >= cart_item.variant_obj.stock %}btn-increment-disabled{% endif %}"
+                    {% if cart_item.quantity >= cart_item.variant_obj.stock %}disabled{% endif %}
+                    data-action="increment"
+                    title="افزایش"
+                  >
+                      <svg class="h-5 w-5 text-primary">
+                        <use xlink:href="#plus" />
+                      </svg>
+                    </button>
+                    <input
+                      value="{{ cart_item.quantity }}"
+                      disabled
+                      type="number"
+                      class="quantity-input flex h-5 w-full grow select-none items-center justify-center bg-transparent text-center text-sm outline-hidden"
+                    />
+                    <button
+                      type="button"
+                      class="decrement-btn"
+                      {% if cart_item.quantity <= 1 %}disabled{% endif %}
+                      data-action="decrement"
+                      title="کاهش"
+                    >
+                      <svg
+                        class="h-5 w-5 text-red-600 dark:text-red-500 {% if cart_item.quantity <= 1 %}opacity-50{% endif %}"
+                      >
+                        <use xlink:href="#minus" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+          {% empty %}
+            <li class="py-4 text-center text-text/60">سبد خرید شما خالی است.</li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <!-- Footer -->
+
+      <div
+        class="flex items-center justify-between border-t p-5"
+      >
+        <div class="flex flex-col items-center gap-y-1">
+          <div class="text-sm text-text/60">
+            مبلغ قابل پرداخت
+          </div>
+
+          <div class="text-text/90">
+            <span class="font-bold" id="mini-cart-final-amount">{{ cart.total_payment_amount|format_price }}</span>
+            <span class="text-sm">تومان</span>
+          </div>
+        </div>
+        <a href="{% url "cart:checkout" %}">
+          <button
+            class="btn-primary w-32 py-3 text-sm"
+            type="button"
+          >
+            ثبت سفارش
+          </button>
+        </a>
+      </div>
+    </div>
+    
+
+    <!-- Empty Basket -->
+    <div
+      class="z-10 ml-5! hidden w-[400px] overflow-hidden rounded-lg border-t-2 border-t-primary bg-muted"
+      id="dropdownBasketDesktopEmpty"
+    >
+      <div class="flex justify-center items-center py-6">
+        <div class="flex items-center justify-center flex-col gap-y-4">
+          <svg class="w-20 h-20  text-text/90  ">
+            <use xlink:href="#order-off"/>
+          </svg>
+          <p class=" text-text/90   text-lg">
+            سبد خرید شما خالی میباشد
+          </p>
+          <a class="btn-primary w-full py-3" href="#">
+            فروشگاه
+          </a>
+        </div>
+      </div>
+    </div>
+</div>
+{% endblock extra_navbar_desktop %}
+
+
+{% block extra_navbar_mobile %}
+<!-- Cart -->
+<button
+aria-controls="user-basket-drawer-navigation"
+class="relative"
+data-drawer-show="user-basket-drawer-navigation"
+data-drawer-target="user-basket-drawer-navigation"
+type="button"
+>
+<span class="cursor-pointer">
+  <svg class="h-6 w-6">
+    <use xlink:href="#cart" />
+  </svg>
+</span>
+<span
+  class="absolute -right-2.5 -top-2.5 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-primary-btn text-sm font-bold text-white"
+>
+{{ cart.total_quantity }}
+</span>
+</button>
+{% endblock extra_navbar_mobile %}
+
+
+{% block mobile_user_account_drawer %}
+<!-- Mobile User Basket Drawer -->
+
+<div
+aria-labelledby="user-basket-drawer-navigation-label"
+class="fixed left-0 top-0 z-40 h-full w-80 -translate-x-full bg-muted transition-transform duration-300"
+id="user-basket-drawer-navigation"
+tabindex="-1"
+>
+<div
+  class="flex items-center justify-between gap-x-4 border-b p-4 pb-5"
+>
+  <button
+    aria-controls="user-account-drawer-navigation"
+    class="inline-flex items-center rounded-lg bg-transparent p-1.5 text-sm text-text/90"
+    data-drawer-hide="user-basket-drawer-navigation"
+    type="button"
+  >
+    <svg class="h-5 w-5">
+      <use xlink:href="#close" />
+    </svg>
+
+    <span class="sr-only">Close menu</span>
+  </button>
+  <h5 class="text-lg text-text/90">
+    سبد خرید <span class="text-sm">( {{ cart.cart_items.values|length }} )</span>
+  </h5>
+</div>
+<div class="h-full pb-[150px]">
+  <ul
+    class="main-scroll h-full space-y-2 divide-y overflow-y-auto p-4"
+  >
+  {% for cart_item in cart.cart_items.values %}
+  <li data-variant-id="{{ cart_item.variant_obj.id }}">
+    <div class="flex gap-x-2 py-5">
+      <div class="relative min-w-fit">
+        <a href="{% url "shop:product-detail" slug=cart_item.variant_obj.id %}">
+          <img
+            alt=""
+            class="h-20 w-20"
+            loading="lazy"
+            src="{{ cart_item.variant_obj.product.image.url }}"
+          />
+        </a>
+        <button
+          class="remove-product-btn-drawer absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-background"
+          type="button"
+          title="حذف"
+        >
+          <svg class="h-6 w-6 text-red-600 dark:text-red-500">
+            <use xlink:href="#close" />
+          </svg>
+        </button>
+      </div>
+  
+      <div class="w-full space-y-1.5">
+        <a class="line-clamp-2 h-10 text-sm" href="./product-detail.html">
+          {{ cart_item.variant_obj.product.name}}
+        </a>
+        <div class="flex items-center gap-x-2 text-xs text-text/60">
+          <div>تعداد : {{ cart_item.quantity }}</div>
+          <div class="h-3 w-px rounded-full bg-background"></div>
+          <div class="flex items-center gap-x-2">
+            <span>{{ cart_item.variant_obj.attribute_value.value }}</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between gap-x-2">
+          <div class="text-primary">
+            <span class="font-bold item-total-price">{{ cart_item.total_price_with_discount|format_price }}</span>
+            <span class="text-sm">تومان</span>
+          </div>
+          <div
+            class="flex h-10 w-24 items-center justify-between rounded-lg border px-2 py-1 quantity-container"
+            data-max-stock="{{ cart_item.variant_obj.stock }}"
+            data-variant-id="{{ cart_item.variant_obj.id }}"
+          >
+            <button
+              type="button"
+              class="increment-btn-drawer {% if cart_item.quantity >= cart_item.variant_obj.stock %}btn-increment-disabled{% endif %}"
+              {% if cart_item.quantity >= cart_item.variant_obj.stock %}disabled{% endif %}
+              data-action="increment"
+              title="افزایش"
+            >
+              <svg class="h-5 w-5 text-primary">
+                <use xlink:href="#plus" />
+              </svg>
+            </button>
+            <input
+              value="{{ cart_item.quantity }}"
+              disabled
+              type="number"
+              class="quantity-input flex h-5 w-full grow select-none items-center justify-center bg-transparent text-center text-sm outline-hidden"
+            />
+            <button
+              type="button"
+              class="decrement-btn-drawer"
+              {% if cart_item.quantity <= 1 %}disabled{% endif %}
+              data-action="decrement"
+              title="کاهش"
+            >
+              <svg
+                class="h-5 w-5 text-red-600 dark:text-red-500 {% if cart_item.quantity <= 1 %}opacity-50{% endif %}"
+              >
+                <use xlink:href="#minus" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </li>
+    {% endfor %}
+  </ul>
+</div><!-- Footer -->
+<div
+  class="sticky bottom-0 left-0 right-0 flex items-center justify-between border-t p-4 px-6 py-4"
+>
+  <div class="flex flex-col items-center gap-y-1">
+    <div class="text-sm text-text/60">مبلغ قابل پرداخت</div>
+    <div class="text-text/90">
+      <span class="font-bold drawer-final-amount">{{ cart.total_payment_amount|format_price }}</span>
+      <span class="text-sm">تومان</span>
+    </div>
+  </div>
+  <a
+    class="btn-primary w-32 py-3 text-sm"
+    href="./checkout-cart.html"
+  >
+    مشاهده سبد خرید
+  </a>
+</div>
+</div>
+
+{% endblock mobile_user_account_drawer %}
+

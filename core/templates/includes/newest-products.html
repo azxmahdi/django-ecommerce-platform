@@ -1,0 +1,92 @@
+{% load price_filters %}
+
+<section class="mb-8">
+    <div class="container relative">
+      <!-- Section Header -->
+      <div class="mb-4 flex items-center justify-between">
+        <h3 class="font-medium md:text-lg lg:text-xl">
+          جدیدترین محصولات
+        </h3>
+        <a
+          class="flex items-center gap-x-2 py-2 text-sm text-primary lg:text-base"
+          href="{% url "shop:product-list" %}?order_by=-created_date"
+        >
+          مشاهده همه
+          <span>
+            <svg class="h-5 w-5 lg:h-6 lg:w-6">
+              <use xlink:href="#chevron-left" />
+            </svg>
+          </span>
+        </a>
+      </div>
+      <!-- Section Content -->
+
+      <div class="swiper product-slider">
+        <div class="swiper-wrapper p-px">
+          {% for product in products %}
+          <div class="swiper-slide">
+            <!-- Product Card -->
+            <div
+              class="border-gradient group relative rounded-base p-px before:absolute before:-inset-px before:h-[calc(100%+2px)] before:w-[calc(100%+2px)] before:rounded-base"
+            >
+              <div
+                class="relative rounded-xl bg-muted p-2 shadow-base md:p-5"
+              >
+                <!-- image -->
+                <div class="mb-2 md:mb-5" draggable="false">
+                  <a href="{% url "shop:product-detail" slug=product.slug %}">
+                    <img
+                      alt=""
+                      class="mx-auto w-32 rounded-lg md:w-auto"
+                      src="{{ product.image.url }}"
+                    />
+                  </a>
+                </div>
+                <!-- title -->
+                <div class="mb-2">
+                  <a
+                    class="line-clamp-2 h-10 text-sm md:h-12 md:text-base"
+                    href="{% url "shop:product-detail" slug=product.slug %}"
+                  >
+                    {{ product.name }}
+                  </a>
+                </div>
+                <!-- Prices -->
+                <div class="flex flex-col">
+                  <!-- Old price -->
+                  <div class="h-5 text-left">
+                    <del
+                      class="text-sm text-text/60 decoration-warning md:text-base"
+                    >
+                      {{ product.price|format_price }}
+                    </del>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p
+                        class="w-9 rounded-full bg-warning py-px text-center text-sm text-white"
+                      >
+                        {{ product.discount_percent}}%
+                      </p>
+                    </div>
+                    <!-- New price -->
+                    <div
+                      class="text-sm font-bold text-primary md:text-base"
+                    >
+                    {{ product.final_price|format_price }}
+                      <span class="text-xs font-light md:text-sm"
+                        >تومان</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+      </div>
+    </div>
+  </section>
